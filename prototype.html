@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Maine Election Results — Bangor Daily News</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            bdn: { green: '#2D6A2D', dark: '#1F4E1F', light: '#EBF3EB' },
+            dem: { DEFAULT: '#1A5FAB', light: '#E8F0FA' },
+            rep: { DEFAULT: '#CC2929', light: '#FAE8E8' },
+          },
+          fontFamily: {
+            headline: ['"Franklin Gothic Medium"', '"Arial Narrow"', 'Arial', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: Georgia, serif; background: #F8F8F8; }
+    .border-card { border: 1px solid #E5E5E5; }
+    .text-muted { color: #6B7280; }
+    .winner-row { background: #F0FDF4; }
+    .chip-scroll::-webkit-scrollbar { display: none; }
+    .chip-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+    .progress-bar-track { background: #E5E5E5; border-radius: 9999px; height: 5px; }
+    .progress-bar-fill { background: #2D6A2D; border-radius: 9999px; height: 5px; }
+    .slide-up { transform: translateY(100%); transition: transform 0.3s ease; }
+    .slide-up.open { transform: translateY(0); }
+    .modal-overlay { display: none; }
+    .modal-overlay.open { display: flex; }
+    .tray-content { display: none; }
+    .tray-content.open { display: block; }
+    .tray-chevron { transition: transform 0.2s ease; }
+    .tray-chevron.open { transform: rotate(180deg); }
+    @media (min-width: 640px) {
+      .pb-safe { padding-bottom: 0; }
+    }
+  </style>
+</head>
+<body class="pb-16 sm:pb-0">
+
+  <!-- BDN Header -->
+  <header class="bg-bdn-green sticky top-0 z-40 shadow-md">
+    <div class="max-w-5xl mx-auto px-3 py-2 flex items-center gap-3">
+      <div class="bg-white rounded-sm px-2 py-1 flex items-center justify-center">
+        <span class="font-headline font-black text-bdn-green text-xl leading-none tracking-tight">BDN</span>
+      </div>
+      <span class="font-headline text-white text-sm sm:text-base font-semibold tracking-wide uppercase">Bangor Daily News</span>
+      <nav class="ml-auto">
+        <span class="font-headline text-white text-xs sm:text-sm font-bold uppercase tracking-wider border-b-2 border-white pb-0.5">Election Results</span>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Scoreboard Hero -->
+  <section class="bg-bdn-dark text-white">
+    <div class="max-w-5xl mx-auto px-3 pt-4 pb-3">
+      <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs font-headline tracking-wide mb-4">
+        <span class="font-bold text-green-300">4 races called</span>
+        <span class="text-gray-400">·</span>
+        <span>3 still counting</span>
+        <span class="text-gray-400">·</span>
+        <span class="text-amber-300 font-bold">1 too close</span>
+        <span class="text-gray-400">·</span>
+        <span class="text-gray-300">Updated 9:47 p.m. ET</span>
+      </div>
+
+      <div class="chip-scroll flex gap-2.5 overflow-x-auto pb-3">
+        <!-- Governor Dem chip -->
+        <div class="flex-shrink-0 bg-white/10 border border-white/20 rounded-lg px-3 py-2.5 min-w-[170px]">
+          <div class="font-headline text-xs text-gray-300 uppercase tracking-wider mb-1">Governor · Dem</div>
+          <div class="font-headline font-bold text-white text-base leading-tight">Shah 27.2%</div>
+          <div class="mt-1.5">
+            <span class="inline-flex items-center gap-1 bg-gray-500/50 text-gray-200 text-xs font-headline px-2 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-pulse"></span>Counting
+            </span>
+          </div>
+        </div>
+        <!-- Governor Rep chip -->
+        <div class="flex-shrink-0 bg-white/10 border border-white/20 rounded-lg px-3 py-2.5 min-w-[170px]">
+          <div class="font-headline text-xs text-gray-300 uppercase tracking-wider mb-1">Governor · Rep</div>
+          <div class="font-headline font-bold text-white text-base leading-tight">Mason 47.6%</div>
+          <div class="mt-1.5">
+            <span class="inline-flex items-center gap-1 bg-green-700/70 text-green-200 text-xs font-headline px-2 py-0.5 rounded-full">
+              <span>✓</span>Called
+            </span>
+          </div>
+        </div>
+        <!-- CD2 Dem chip -->
+        <div class="flex-shrink-0 bg-white/10 border border-white/20 rounded-lg px-3 py-2.5 min-w-[170px]">
+          <div class="font-headline text-xs text-gray-300 uppercase tracking-wider mb-1">U.S. House CD2 · Dem</div>
+          <div class="font-headline font-bold text-white text-base leading-tight">Dunlap 34.4%</div>
+          <div class="mt-1.5">
+            <span class="inline-flex items-center gap-1 bg-gray-500/50 text-gray-200 text-xs font-headline px-2 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-pulse"></span>Counting
+            </span>
+          </div>
+        </div>
+        <!-- Senate Dem chip -->
+        <div class="flex-shrink-0 bg-white/10 border border-white/20 rounded-lg px-3 py-2.5 min-w-[170px]">
+          <div class="font-headline text-xs text-gray-300 uppercase tracking-wider mb-1">U.S. Senate · Dem</div>
+          <div class="font-headline font-bold text-white text-base leading-tight">Cand. One 51.2%</div>
+          <div class="mt-1.5">
+            <span class="inline-flex items-center gap-1 bg-amber-600/60 text-amber-200 text-xs font-headline px-2 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 bg-amber-300 rounded-full animate-pulse"></span>Too Close
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Still counting tray -->
+      <div class="border border-white/20 rounded-lg overflow-hidden mt-1">
+        <button
+          onclick="toggleTray()"
+          class="w-full flex items-center justify-between px-3 py-2.5 text-left bg-white/5 hover:bg-white/10 transition-colors"
+        >
+          <span class="font-headline text-sm font-bold text-white uppercase tracking-wide">Still Counting</span>
+          <svg id="trayChevron" class="tray-chevron w-4 h-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+        <div id="trayContent" class="tray-content">
+          <div class="border-t border-white/10">
+            <div class="px-3 py-2 flex items-start justify-between border-b border-white/10">
+              <div>
+                <span class="font-headline text-sm text-white font-semibold">Governor — Dem</span>
+                <span class="text-gray-400 text-xs ml-1">45% in</span>
+              </div>
+              <span class="text-gray-300 text-xs text-right">Shah leads by 3.6 pts</span>
+            </div>
+            <div class="px-3 py-2 flex items-start justify-between border-b border-white/10">
+              <div>
+                <span class="font-headline text-sm text-white font-semibold">U.S. House CD2 — Dem</span>
+                <span class="text-gray-400 text-xs ml-1">35% in</span>
+              </div>
+              <span class="text-gray-300 text-xs text-right">Dunlap leads by 7.1 pts</span>
+            </div>
+            <div class="px-3 py-2 flex items-start justify-between">
+              <div>
+                <span class="font-headline text-sm text-amber-300 font-semibold">U.S. Senate — Dem</span>
+                <span class="text-gray-400 text-xs ml-1">40% in</span>
+              </div>
+              <span class="text-amber-300 text-xs font-bold text-right">Too close · 2.4 pts</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main content -->
+  <main class="max-w-5xl mx-auto px-3 py-5">
+
+    <!-- GOVERNOR section -->
+    <section class="mb-8">
+      <h2 class="font-headline text-xl font-black uppercase tracking-wider text-bdn-green border-b-2 border-bdn-green pb-1 mb-4">Governor</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+        <!-- Governor Dem card -->
+        <div>
+          <!-- Reporter note -->
+          <div class="mb-2 bg-yellow-50 border border-yellow-200 rounded px-3 py-2">
+            <p class="text-xs text-gray-700 italic leading-snug">📝 <em>Penobscot County, which favors Jackson, is slow to report. Results may not arrive until 10 p.m.</em></p>
+            <p class="text-xs font-headline font-bold text-bdn-green mt-1 not-italic">— BDN Politics</p>
+          </div>
+          <div class="bg-white border-card rounded-lg overflow-hidden shadow-sm">
+            <div class="bg-dem flex items-center justify-between px-3 py-2">
+              <span class="font-headline text-white text-xs font-bold uppercase tracking-widest">Democratic Primary</span>
+              <span class="inline-flex items-center gap-1 bg-gray-600/80 text-gray-100 text-xs font-headline px-2 py-0.5 rounded-full">
+                <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-pulse"></span>Counting
+              </span>
+            </div>
+            <div class="divide-y divide-gray-100">
+              <!-- Shah 27.2 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">Shah</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">14,830</span>
+                    <span class="font-headline font-black text-base text-gray-900">27.2%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:27.2%"></div></div>
+              </div>
+              <!-- Bellows 23.6 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">Bellows</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">12,880</span>
+                    <span class="font-headline font-black text-base text-gray-900">23.6%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:23.6%"></div></div>
+              </div>
+              <!-- Pingree 21.2 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">Pingree</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">11,570</span>
+                    <span class="font-headline font-black text-base text-gray-900">21.2%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:21.2%"></div></div>
+              </div>
+              <!-- Jackson 17.0 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">Jackson</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">9,283</span>
+                    <span class="font-headline font-black text-base text-gray-900">17.0%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:17.0%"></div></div>
+              </div>
+              <!-- King 11.0 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">King</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">6,005</span>
+                    <span class="font-headline font-black text-base text-gray-900">11.0%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:11.0%"></div></div>
+              </div>
+            </div>
+            <div class="px-3 py-2.5 border-t border-gray-100 flex items-center justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-headline text-xs text-muted">45% reporting</span>
+                  <span class="font-headline text-xs text-muted">312 of 694 precincts</span>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill" style="width:45%"></div></div>
+              </div>
+              <button class="flex-shrink-0 font-headline text-xs font-bold text-bdn-green border border-bdn-green rounded px-2 py-1 hover:bg-bdn-light transition-colors">🔔 Get alerts</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Governor Rep card -->
+        <div>
+          <div class="bg-white border-card rounded-lg overflow-hidden shadow-sm">
+            <div class="bg-rep flex items-center justify-between px-3 py-2">
+              <span class="font-headline text-white text-xs font-bold uppercase tracking-widest">Republican Primary</span>
+              <span class="inline-flex items-center gap-1 bg-green-700 text-green-100 text-xs font-headline px-2 py-0.5 rounded-full">
+                ✓ Called
+              </span>
+            </div>
+            <div class="bg-[#F0FDF4] border-b border-green-200 px-3 py-2 flex items-center gap-2">
+              <span class="text-green-700 font-headline font-black text-sm">✓ Mason wins the Republican Primary</span>
+            </div>
+            <div class="divide-y divide-gray-100">
+              <!-- Mason 47.6 WINNER -->
+              <div class="winner-row px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-black text-green-800 flex items-center gap-1">
+                    <span class="text-green-600">✓</span> Mason
+                  </span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">28,940</span>
+                    <span class="font-headline font-black text-base text-green-800">47.6%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-rep" style="width:47.6%"></div></div>
+              </div>
+              <!-- McCarthy 24.6 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">McCarthy</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">14,951</span>
+                    <span class="font-headline font-black text-base text-gray-900">24.6%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-rep" style="width:24.6%"></div></div>
+              </div>
+              <!-- Bush 14.3 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">Bush</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">8,693</span>
+                    <span class="font-headline font-black text-base text-gray-900">14.3%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-rep" style="width:14.3%"></div></div>
+              </div>
+              <!-- Wessels 7.2 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">Wessels</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">4,377</span>
+                    <span class="font-headline font-black text-base text-gray-900">7.2%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-rep" style="width:7.2%"></div></div>
+              </div>
+              <!-- Jones 6.3 -->
+              <div class="px-3 pt-2.5 pb-1.5">
+                <div class="flex items-baseline justify-between mb-1">
+                  <span class="font-headline text-sm font-bold text-gray-900">Jones</span>
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-muted text-xs">3,829</span>
+                    <span class="font-headline font-black text-base text-gray-900">6.3%</span>
+                  </div>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill bg-rep" style="width:6.3%"></div></div>
+              </div>
+            </div>
+            <div class="px-3 py-2.5 border-t border-gray-100 flex items-center justify-between gap-3">
+              <div class="flex-1">
+                <div class="flex items-center justify-between mb-1">
+                  <span class="font-headline text-xs text-muted">60% reporting</span>
+                  <span class="font-headline text-xs text-muted">416 of 694 precincts</span>
+                </div>
+                <div class="progress-bar-track"><div class="progress-bar-fill" style="width:60%"></div></div>
+              </div>
+              <button class="flex-shrink-0 font-headline text-xs font-bold text-bdn-green border border-bdn-green rounded px-2 py-1 hover:bg-bdn-light transition-colors">🔔 Get alerts</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- U.S. HOUSE, DISTRICT 2 section -->
+    <section class="mb-8">
+      <h2 class="font-headline text-xl font-black uppercase tracking-wider text-bdn-green border-b-2 border-bdn-green pb-1 mb-4">U.S. House, District 2</h2>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <!-- CD2 Dem card -->
+        <div class="bg-white border-card rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-dem flex items-center justify-between px-3 py-2">
+            <span class="font-headline text-white text-xs font-bold uppercase tracking-widest">Democratic Primary</span>
+            <span class="inline-flex items-center gap-1 bg-gray-600/80 text-gray-100 text-xs font-headline px-2 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 bg-gray-300 rounded-full animate-pulse"></span>Counting
+            </span>
+          </div>
+          <div class="divide-y divide-gray-100">
+            <!-- Dunlap 34.4 -->
+            <div class="px-3 pt-2.5 pb-1.5">
+              <div class="flex items-baseline justify-between mb-1">
+                <span class="font-headline text-sm font-bold text-gray-900">Dunlap</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-muted text-xs">9,217</span>
+                  <span class="font-headline font-black text-base text-gray-900">34.4%</span>
+                </div>
+              </div>
+              <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:34.4%"></div></div>
+            </div>
+            <!-- Baldacci 27.3 -->
+            <div class="px-3 pt-2.5 pb-1.5">
+              <div class="flex items-baseline justify-between mb-1">
+                <span class="font-headline text-sm font-bold text-gray-900">Baldacci</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-muted text-xs">7,319</span>
+                  <span class="font-headline font-black text-base text-gray-900">27.3%</span>
+                </div>
+              </div>
+              <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:27.3%"></div></div>
+            </div>
+            <!-- Wood 23.5 -->
+            <div class="px-3 pt-2.5 pb-1.5">
+              <div class="flex items-baseline justify-between mb-1">
+                <span class="font-headline text-sm font-bold text-gray-900">Wood</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-muted text-xs">6,302</span>
+                  <span class="font-headline font-black text-base text-gray-900">23.5%</span>
+                </div>
+              </div>
+              <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:23.5%"></div></div>
+            </div>
+            <!-- Loud 14.8 -->
+            <div class="px-3 pt-2.5 pb-1.5">
+              <div class="flex items-baseline justify-between mb-1">
+                <span class="font-headline text-sm font-bold text-gray-900">Loud</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-muted text-xs">3,967</span>
+                  <span class="font-headline font-black text-base text-gray-900">14.8%</span>
+                </div>
+              </div>
+              <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:14.8%"></div></div>
+            </div>
+          </div>
+          <div class="px-3 py-2.5 border-t border-gray-100 flex items-center justify-between gap-3">
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-headline text-xs text-muted">35% reporting</span>
+                <span class="font-headline text-xs text-muted">91 of 261 precincts</span>
+              </div>
+              <div class="progress-bar-track"><div class="progress-bar-fill" style="width:35%"></div></div>
+            </div>
+            <button class="flex-shrink-0 font-headline text-xs font-bold text-bdn-green border border-bdn-green rounded px-2 py-1 hover:bg-bdn-light transition-colors">🔔 Get alerts</button>
+          </div>
+        </div>
+
+        <!-- U.S. Senate Too Close card -->
+        <div class="bg-white border-card rounded-lg overflow-hidden shadow-sm">
+          <div class="bg-dem flex items-center justify-between px-3 py-2">
+            <span class="font-headline text-white text-xs font-bold uppercase tracking-widest">U.S. Senate · Dem Primary</span>
+            <span class="inline-flex items-center gap-1 bg-amber-500 text-white text-xs font-headline px-2 py-0.5 rounded-full">
+              <span class="w-1.5 h-1.5 bg-amber-200 rounded-full animate-pulse"></span>Too Close
+            </span>
+          </div>
+          <div class="bg-amber-50 border-b border-amber-200 px-3 py-1.5">
+            <span class="font-headline text-amber-700 text-xs font-bold">Race too close to call · 2.4 pt margin</span>
+          </div>
+          <div class="divide-y divide-gray-100">
+            <!-- Candidate One 51.2 -->
+            <div class="px-3 pt-2.5 pb-1.5">
+              <div class="flex items-baseline justify-between mb-1">
+                <span class="font-headline text-sm font-bold text-gray-900">Candidate One</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-muted text-xs">11,264</span>
+                  <span class="font-headline font-black text-base text-gray-900">51.2%</span>
+                </div>
+              </div>
+              <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:51.2%"></div></div>
+            </div>
+            <!-- Candidate Two 48.8 -->
+            <div class="px-3 pt-2.5 pb-1.5">
+              <div class="flex items-baseline justify-between mb-1">
+                <span class="font-headline text-sm font-bold text-gray-900">Candidate Two</span>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-muted text-xs">10,736</span>
+                  <span class="font-headline font-black text-base text-gray-900">48.8%</span>
+                </div>
+              </div>
+              <div class="progress-bar-track"><div class="progress-bar-fill bg-dem" style="width:48.8%"></div></div>
+            </div>
+          </div>
+          <div class="px-3 py-2.5 border-t border-gray-100 flex items-center justify-between gap-3">
+            <div class="flex-1">
+              <div class="flex items-center justify-between mb-1">
+                <span class="font-headline text-xs text-muted">40% reporting</span>
+                <span class="font-headline text-xs text-muted">66 of 165 precincts</span>
+              </div>
+              <div class="progress-bar-track"><div class="progress-bar-fill" style="width:40%"></div></div>
+            </div>
+            <button class="flex-shrink-0 font-headline text-xs font-bold text-bdn-green border border-bdn-green rounded px-2 py-1 hover:bg-bdn-light transition-colors">🔔 Get alerts</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Calls Log -->
+    <section class="mb-8">
+      <h2 class="font-headline text-xl font-black uppercase tracking-wider text-bdn-green border-b-2 border-bdn-green pb-1 mb-4">Calls Log</h2>
+      <div class="space-y-3">
+        <div class="bg-white border-card rounded-lg overflow-hidden shadow-sm flex">
+          <div class="w-1 bg-bdn-green flex-shrink-0"></div>
+          <div class="px-3 py-3">
+            <div class="font-headline text-xs text-muted mb-0.5 uppercase tracking-wide">9:31 p.m.</div>
+            <p class="font-headline text-sm font-bold text-gray-900">Garrett Mason wins Republican Primary for Governor</p>
+            <p class="text-xs text-muted mt-0.5">Called by Decision Desk HQ · 60% reporting, +23.0 pts</p>
+          </div>
+        </div>
+        <div class="bg-white border-card rounded-lg overflow-hidden shadow-sm flex">
+          <div class="w-1 bg-bdn-green flex-shrink-0"></div>
+          <div class="px-3 py-3">
+            <div class="font-headline text-xs text-muted mb-0.5 uppercase tracking-wide">9:02 p.m.</div>
+            <p class="font-headline text-sm font-bold text-gray-900">Polls close across Maine</p>
+            <p class="text-xs text-muted mt-0.5">Results begin posting · Decision Desk HQ</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="border-t border-gray-200 bg-white py-4 px-3">
+    <div class="max-w-5xl mx-auto text-center">
+      <p class="font-headline text-xs text-muted">Results by Decision Desk HQ · © 2026 Bangor Daily News</p>
+    </div>
+  </footer>
+
+  <!-- Sticky bottom bar (mobile) -->
+  <div class="fixed bottom-0 left-0 right-0 sm:hidden z-30">
+    <button
+      onclick="openModal()"
+      class="w-full bg-bdn-green text-white font-headline text-sm font-bold py-3.5 px-4 flex items-center justify-between shadow-lg"
+    >
+      <span>📍 What happened in my town?</span>
+      <span class="flex items-center gap-1 text-bdn-light text-xs">Jump to town results <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></span>
+    </button>
+  </div>
+
+  <!-- Town picker modal overlay -->
+  <div id="modalOverlay" class="modal-overlay fixed inset-0 z-50 items-end justify-center bg-black/50">
+    <div id="modalSheet" class="slide-up w-full max-w-lg bg-white rounded-t-2xl shadow-2xl pb-8">
+      <div class="flex items-center justify-between px-4 pt-4 pb-3 border-b border-gray-100">
+        <h3 class="font-headline font-black text-lg text-gray-900 uppercase tracking-wide">Town Results</h3>
+        <button onclick="closeModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 font-bold text-lg leading-none">×</button>
+      </div>
+      <div class="px-4 pt-4">
+        <input
+          type="text"
+          placeholder="Enter town name…"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2.5 font-headline text-sm focus:outline-none focus:border-bdn-green focus:ring-1 focus:ring-bdn-green"
+        />
+        <p class="font-headline text-xs text-muted mt-3 mb-2 uppercase tracking-wide">Browse popular towns</p>
+        <div class="grid grid-cols-2 gap-2">
+          <a href="towns/bangor.html" class="bg-bdn-light text-bdn-green font-headline font-bold text-sm rounded-lg px-3 py-2.5 text-center hover:bg-bdn-green hover:text-white transition-colors">Bangor</a>
+          <a href="towns/portland.html" class="bg-bdn-light text-bdn-green font-headline font-bold text-sm rounded-lg px-3 py-2.5 text-center hover:bg-bdn-green hover:text-white transition-colors">Portland</a>
+          <a href="towns/lewiston.html" class="bg-bdn-light text-bdn-green font-headline font-bold text-sm rounded-lg px-3 py-2.5 text-center hover:bg-bdn-green hover:text-white transition-colors">Lewiston</a>
+          <a href="towns/caribou.html" class="bg-bdn-light text-bdn-green font-headline font-bold text-sm rounded-lg px-3 py-2.5 text-center hover:bg-bdn-green hover:text-white transition-colors">Caribou</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTray() {
+      const content = document.getElementById('trayContent');
+      const chevron = document.getElementById('trayChevron');
+      content.classList.toggle('open');
+      chevron.classList.toggle('open');
+    }
+
+    function openModal() {
+      const overlay = document.getElementById('modalOverlay');
+      const sheet = document.getElementById('modalSheet');
+      overlay.classList.add('open');
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          sheet.classList.add('open');
+        });
+      });
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      const overlay = document.getElementById('modalOverlay');
+      const sheet = document.getElementById('modalSheet');
+      sheet.classList.remove('open');
+      setTimeout(() => {
+        overlay.classList.remove('open');
+        document.body.style.overflow = '';
+      }, 300);
+    }
+
+    document.getElementById('modalOverlay').addEventListener('click', function(e) {
+      if (e.target === this) closeModal();
+    });
+  </script>
+
+</body>
+</html>

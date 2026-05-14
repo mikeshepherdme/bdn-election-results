@@ -1,0 +1,53 @@
+@import "tailwindcss";
+@import "./bdn-design-system.css";
+
+@theme {
+  /* BDN brand — aligned with design system tokens */
+  --color-bdn-green:       #2e6b3e;
+  --color-bdn-green-dark:  #1e4d2c;
+  --color-bdn-green-light: #d6ead9;
+
+  /* BDN neutrals */
+  --color-gray-100: #f2f2f2;
+  --color-gray-300: #c8c8c8;
+  --color-gray-500: #767676;
+  --color-gray-700: #444444;
+  --color-gray-900: #1a1a1a;
+
+  /* Election-specific */
+  --color-dem:       #1A5FAB;
+  --color-dem-light: #E8F0FA;
+  --color-rep:       #CC2929;
+  --color-rep-light: #FAE8E8;
+  --color-called:    #166534;
+  --color-called-bg: #F0FDF4;
+
+  /* Semantic aliases for Tailwind utilities */
+  --color-surface: #f2f2f2;
+  --color-border:  #c8c8c8;
+  --color-muted:   #767676;
+
+  /* Typography — BDN uses Georgia for headlines, Helvetica Neue for body */
+  --font-headline: Georgia, "Times New Roman", Times, serif;
+  --font-sans:     "Helvetica Neue", Arial, Helvetica, sans-serif;
+  --font-serif:    Georgia, "Times New Roman", Times, serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #ffffff;
+  color: #1a1a1a;
+}
+
+h1, h2, h3, h4, .font-headline {
+  font-family: var(--font-headline);
+}
+
+/* Leaflet — white background so the map floats on the page instead of gray tiles */
+.leaflet-container {
+  background: #ffffff !important;
+}
+
+.leaflet-control-zoom a {
+  font-family: var(--font-sans) !important;
+}
