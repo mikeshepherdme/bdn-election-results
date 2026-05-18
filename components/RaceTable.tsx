@@ -183,7 +183,7 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
                   style={{ paddingLeft: '8px', paddingRight: '8px', textAlign: 'left' }}>Party</th>
             )}
             <th className={`${full ? 'py-2.5' : 'py-1.5'} text-xs text-[#767676] font-medium`}
-                style={{ paddingLeft: full ? '24px' : '16px', paddingRight: full ? '24px' : '16px', textAlign: 'left' }}>Percentage</th>
+                style={{ paddingLeft: full ? '24px' : '16px', paddingRight: full ? '24px' : '16px', textAlign: full ? 'left' : 'right' }}>Percentage</th>
             <th className={`${full ? 'py-2.5' : 'py-1.5'} text-xs text-[#767676] font-medium`}
                 style={{ textAlign: 'right', paddingLeft: '16px', paddingRight: '24px' }}>Votes</th>
           </tr>
