@@ -5,6 +5,7 @@ import type { Race } from '@/lib/types'
 import { candidatePct, municipalitiesReporting, pctReporting, sortCandidates } from '@/lib/types'
 import { candidatePhoto, candidatePhotoPosition } from '@/lib/candidate-photos'
 import { candidateColorMap } from '@/lib/candidate-colors'
+import { isSuspended } from '@/lib/suspended-candidates'
 
 const ESTIMATED_VOTES_DISCLAIMER =
   "Estimated votes represents Decision Desk HQ's predicted estimate for the amount of votes that have been reported by local clerks. It will change as votes come in."
@@ -16,6 +17,72 @@ interface Props {
   compact?: boolean
   label?: string
   borderless?: boolean
+}
+
+const SUSPENDED_TOOLTIP =
+  'This candidate has stopped campaigning. They will remain on the ballot, and votes for them will be counted.'
+
+// ── Suspended campaign badge with tooltip ────────────────────────────────────
+function SuspendedBadge() {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLSpanElement>(null)
+
+  const tooltipStyle = (): React.CSSProperties => {
+    if (!ref.current) return { display: 'none' }
+    const r = ref.current.getBoundingClientRect()
+    return {
+      position: 'fixed',
+      bottom: window.innerHeight - r.top + 8,
+      left: r.left,
+      width: '260px',
+      backgroundColor: '#1a1a1a',
+      color: '#fff',
+      padding: '8px 10px',
+      borderRadius: '6px',
+      boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+      fontSize: '11px',
+      lineHeight: '1.45',
+      zIndex: 9999,
+      pointerEvents: 'none',
+    }
+  }
+
+  return (
+    <>
+      <span
+        ref={ref}
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+        onFocus={() => setOpen(true)}
+        onBlur={() => setOpen(false)}
+        tabIndex={0}
+        role="note"
+        aria-label={`Suspended — ${SUSPENDED_TOOLTIP}`}
+        className="inline-flex items-center cursor-help"
+        style={{
+          fontSize: '10px',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+          backgroundColor: '#f0f0f0',
+          color: '#666',
+          border: '1px solid #d0d0d0',
+          borderRadius: '3px',
+          padding: '1px 5px',
+          marginLeft: '6px',
+          verticalAlign: 'middle',
+          whiteSpace: 'nowrap',
+        }}
+      >
+        Suspended
+      </span>
+      {open && (
+        <div style={tooltipStyle()}>
+          {SUSPENDED_TOOLTIP}
+        </div>
+      )}
+    </>
+  )
 }
 
 // ── Compact badge (used on homepage cards) ───────────────────────────────────
@@ -260,6 +327,7 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
                         {c.incumbent && (
                           <span className="font-normal text-sm ml-0.5" style={{ color: subTextColor }}> *</span>
                         )}
+                        {isSuspended(c.cand_id) && <SuspendedBadge />}
                       </span>
                       {isCalled && callTime && (
                         <span
