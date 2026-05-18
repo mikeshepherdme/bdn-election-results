@@ -57,10 +57,8 @@ export default function RaceCard({ race, showDistrict }: Props) {
       {/* CTA — the single, explicit entry point to the race page */}
       <Link
         href={`/races/${race.slug}`}
-        className="block text-center text-sm font-bold text-white rounded-b-lg transition-colors"
-        style={{ backgroundColor: '#2e6b3e', padding: '10px 16px' }}
-        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#1e4d2c')}
-        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#2e6b3e')}
+        className="block text-center text-sm font-bold text-white rounded-b-lg transition-colors bg-[#2e6b3e] hover:bg-[#1e4d2c]"
+        style={{ padding: '10px 16px' }}
       >
         {ctaLabel}
       </Link>
