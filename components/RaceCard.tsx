@@ -3,15 +3,17 @@ import type { Race } from '@/lib/types'
 import { isRCV } from '@/lib/types'
 import RaceTable from './RaceTable'
 
-function partyLabelColor(party: string): string {
-  if (party === 'Democratic') return '#1A5FAB'
-  if (party === 'Republican') return '#CC2929'
+function partyLabelColor(race: Race): string {
+  if (race.election_type_id === 9) return '#444444'
+  if (race.party === 'Democratic') return '#1A5FAB'
+  if (race.party === 'Republican') return '#CC2929'
   return '#444444'
 }
 
-function partyLabel(party: string): string {
-  if (party === 'Democratic') return 'Democratic Primary'
-  if (party === 'Republican') return 'Republican Primary'
+function partyLabel(race: Race): string {
+  if (race.election_type_id === 9) return 'Special Election'
+  if (race.party === 'Democratic') return 'Democratic Primary'
+  if (race.party === 'Republican') return 'Republican Primary'
   return 'Nonpartisan'
 }
 
@@ -32,8 +34,8 @@ export default function RaceCard({ race, showDistrict }: Props) {
         )}
         <div className="flex items-center gap-2 mb-2">
           <h3 className="text-xs font-black uppercase tracking-widest transition-colors"
-              style={{ color: partyLabelColor(race.party) }}>
-            {partyLabel(race.party)}
+              style={{ color: partyLabelColor(race) }}>
+            {partyLabel(race)}
           </h3>
           {isRCV(race) && (
             <span className="text-xs font-semibold px-2 py-0.5 rounded-full whitespace-nowrap"

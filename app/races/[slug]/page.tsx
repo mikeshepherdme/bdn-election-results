@@ -90,8 +90,9 @@ export default async function RacePage({ params }: Props) {
   const race = getRace(slug)
   if (!race) notFound()
 
+  const isSpecial = race.election_type_id === 9
   const partyColor = race.party === 'Democratic' ? '#1A5FAB' : race.party === 'Republican' ? '#CC2929' : '#444444'
-  const partyLabel = race.party === 'Democratic' ? 'Democratic Primary' : race.party === 'Republican' ? 'Republican Primary' : 'Nonpartisan'
+  const partyLabel = isSpecial ? 'Special Election' : race.party === 'Democratic' ? 'Democratic Primary' : race.party === 'Republican' ? 'Republican Primary' : 'Nonpartisan'
   const raceTitle = race.district ? `${race.office}, District ${race.district}` : race.office
   const isLegislative = LEGISLATIVE.has(race.office)
   const isCountyOrDA = race.office.includes('County') ||

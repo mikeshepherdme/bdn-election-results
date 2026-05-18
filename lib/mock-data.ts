@@ -6,18 +6,19 @@ function kebab(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
 }
 
-function makeSlug(office: string, party: string, district: string | null): string {
+function makeSlug(office: string, party: string, district: string | null, special = false): string {
   const parts = [kebab(office)]
   if (district) parts.push('district', kebab(String(district)))
-  parts.push(kebab(party), 'primary')
+  special ? parts.push('special', 'election') : parts.push(kebab(party), 'primary')
   return parts.join('-')
 }
 
 function transform(r: any): Race {
   const topline = r.topline_results ?? {}
+  const isSpecial = r.election_type_id === 9
   return {
     race_id: r.race_id,
-    slug: makeSlug(r.office ?? '', r.party ?? 'nonpartisan', r.district ?? null),
+    slug: makeSlug(r.office ?? '', r.party ?? 'nonpartisan', r.district ?? null, isSpecial),
     test_data: r.test_data ?? false,
     year: r.year ?? 2026,
     state: r.state ?? 'ME',

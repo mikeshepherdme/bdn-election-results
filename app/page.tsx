@@ -58,10 +58,11 @@ export default function HomePage() {
 
   // ── Section 2: State Legislature ────────────────────────────────────────────
   const legRaces = races.filter(r => r.level === 'State/District')
-  const senateContested = legRaces.filter(r => r.office === 'State Senate' && !r.uncontested)
-  const houseContested  = legRaces.filter(r => r.office === 'State House'  && !r.uncontested)
-  const senateUncontested = legRaces.filter(r => r.office === 'State Senate' && r.uncontested)
-  const houseUncontested  = legRaces.filter(r => r.office === 'State House'  && r.uncontested)
+  const specialElections = legRaces.filter(r => r.election_type_id === 9)
+  const senateContested = legRaces.filter(r => r.office === 'State Senate' && !r.uncontested && r.election_type_id !== 9)
+  const houseContested  = legRaces.filter(r => r.office === 'State House'  && !r.uncontested && r.election_type_id !== 9)
+  const senateUncontested = legRaces.filter(r => r.office === 'State Senate' && r.uncontested && r.election_type_id !== 9)
+  const houseUncontested  = legRaces.filter(r => r.office === 'State House'  && r.uncontested && r.election_type_id !== 9)
 
   // Group contested legislature by district, dem/rep side by side
   const senatePairs = pairRaces(senateContested).sort((a, b) => {
@@ -167,13 +168,11 @@ export default function HomePage() {
                     State Senate — Contested Primaries
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                    {senatePairs.map(pair => (
-                      pair.dem
-                        ? <RaceCard key={pair.dem.race_id} race={pair.dem} showDistrict />
-                        : pair.rep
-                          ? <RaceCard key={pair.rep!.race_id} race={pair.rep!} showDistrict />
-                          : null
-                    ))}
+                    {senatePairs.flatMap(pair => [
+                      pair.dem && <RaceCard key={pair.dem.race_id} race={pair.dem} showDistrict />,
+                      pair.rep && <RaceCard key={pair.rep.race_id} race={pair.rep} showDistrict />,
+                      ...(pair.nonpartisan ?? []).map(r => <RaceCard key={r.race_id} race={r} showDistrict />),
+                    ].filter(Boolean))}
                   </div>
                   {senateUncontested.length > 0 && (
                     <UncontestedList races={senateUncontested} label="uncontested Senate races" />
@@ -187,13 +186,11 @@ export default function HomePage() {
                     State House — Contested Primaries
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
-                    {housePairs.map(pair => (
-                      pair.dem
-                        ? <RaceCard key={pair.dem.race_id} race={pair.dem} showDistrict />
-                        : pair.rep
-                          ? <RaceCard key={pair.rep!.race_id} race={pair.rep!} showDistrict />
-                          : null
-                    ))}
+                    {housePairs.flatMap(pair => [
+                      pair.dem && <RaceCard key={pair.dem.race_id} race={pair.dem} showDistrict />,
+                      pair.rep && <RaceCard key={pair.rep.race_id} race={pair.rep} showDistrict />,
+                      ...(pair.nonpartisan ?? []).map(r => <RaceCard key={r.race_id} race={r} showDistrict />),
+                    ].filter(Boolean))}
                   </div>
                   {houseUncontested.length > 0 && (
                     <UncontestedList races={houseUncontested} label="uncontested House races" />
@@ -208,6 +205,23 @@ export default function HomePage() {
               {housePairs.length === 0 && houseUncontested.length > 0 && (
                 <UncontestedList races={houseUncontested} label="uncontested State House races" />
               )}
+            </div>
+          </section>
+        )}
+
+        {/* ── Special Elections ────────────────────────────────────────────── */}
+        {specialElections.length > 0 && (
+          <section id="special">
+            <span className="section-label">Special Elections</span>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+              {specialElections.map(r => (
+                <div key={r.race_id}>
+                  <h3 className="font-headline text-xl font-bold tracking-tight mb-3">
+                    {r.office}{r.district ? `, District ${r.district}` : ''}
+                  </h3>
+                  <RaceCard race={r} />
+                </div>
+              ))}
             </div>
           </section>
         )}
