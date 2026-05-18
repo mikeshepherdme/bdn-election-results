@@ -1,6 +1,5 @@
 import type { Race, Candidate, County, Vcu } from '@/lib/types'
-import { readFileSync } from 'fs'
-import { join } from 'path'
+import rawJson from '@/data/ddhq_races.json'
 
 function kebab(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -92,8 +91,7 @@ function transform(r: any): Race {
 }
 
 function loadRaces(): Race[] {
-  const raw = JSON.parse(readFileSync(join(process.cwd(), 'data/ddhq_races.json'), 'utf-8'))
-  return raw.map(transform)
+  return (rawJson as any[]).map(transform)
 }
 
 export function getRaces(): Race[] {
