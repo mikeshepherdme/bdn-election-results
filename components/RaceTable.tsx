@@ -254,6 +254,13 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
                         {c.incumbent && (
                           <span className="font-normal text-sm ml-0.5" style={{ color: subTextColor }}> *</span>
                         )}
+                        {race.election_type_id === 9 && c.party_name && (
+                          <span className="text-xs font-bold ml-1.5" style={{
+                            color: c.party_name === 'Democratic' ? '#1A5FAB' : c.party_name === 'Republican' ? '#CC2929' : '#444444',
+                          }}>
+                            {c.party_name === 'Democratic' ? 'Dem.' : c.party_name === 'Republican' ? 'Rep.' : c.party_name}
+                          </span>
+                        )}
                       </span>
                       {isCalled && callTime && (
                         <span
