@@ -58,7 +58,7 @@ export default function RaceCard({ race, showDistrict }: Props) {
       <Link
         href={`/races/${race.slug}`}
         className="block text-center text-sm font-bold text-white rounded-b-lg transition-colors bg-[#2e6b3e] hover:bg-[#1e4d2c]"
-        style={{ padding: '10px 16px' }}
+        style={{ padding: '10px 16px', color: '#fff', textDecoration: 'none' }}
       >
         {ctaLabel}
       </Link>
