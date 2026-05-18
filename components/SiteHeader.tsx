@@ -46,8 +46,8 @@ export default function SiteHeader() {
   const [townError, setTownError] = useState(false)
 
   useEffect(() => {
-    // Fetch towns once on mount
-    fetch('/api/towns').then(r => r.json()).then(setTowns).catch(() => {})
+    // Fetch towns once on mount (static file, no serverless function needed)
+    fetch('/towns.json').then(r => r.json()).then(setTowns).catch(() => {})
 
     // Fetch race data immediately and on interval
     async function fetchRaces() {
