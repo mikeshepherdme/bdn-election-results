@@ -3,7 +3,7 @@
 import { useState, useRef } from 'react'
 import type { Race } from '@/lib/types'
 import { candidatePct, municipalitiesReporting, pctReporting, sortCandidates } from '@/lib/types'
-import { candidatePhoto } from '@/lib/candidate-photos'
+import { candidatePhoto, candidatePhotoPosition } from '@/lib/candidate-photos'
 import { candidateColorMap } from '@/lib/candidate-colors'
 
 const ESTIMATED_VOTES_DISCLAIMER =
@@ -192,6 +192,7 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
             const isCalled = c.cand_id === calledId && race.called
             const candColor = colorMap[c.cand_id] ?? partyColor
             const photo = candidatePhoto(c.cand_id)
+            const photoPosition = candidatePhotoPosition(c.cand_id)
 
             const rowStyle = { backgroundColor: isCalled ? calledBg : 'white' }
             const textColor = '#1a1a1a'
@@ -215,7 +216,7 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
                           <img
                             src={photo}
                             alt={`${c.first_name} ${c.last_name}`}
-                            style={{ width: '40px', height: '40px', objectFit: 'cover', objectPosition: 'top' }}
+                            style={{ width: '40px', height: '40px', objectFit: 'cover', objectPosition: photoPosition }}
                           />
                         )}
                       </div>
@@ -227,7 +228,7 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
                           <img
                             src={photo}
                             alt={`${c.first_name} ${c.last_name}`}
-                            style={{ width: '36px', height: '36px', objectFit: 'cover', objectPosition: 'top' }}
+                            style={{ width: '36px', height: '36px', objectFit: 'cover', objectPosition: photoPosition }}
                           />
                         )}
                       </div>
