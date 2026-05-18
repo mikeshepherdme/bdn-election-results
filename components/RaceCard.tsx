@@ -23,7 +23,10 @@ interface Props {
 }
 
 export default function RaceCard({ race, showDistrict }: Props) {
-  const raceTitle = race.district ? `${race.office}, District ${race.district}` : race.office
+  const ctaLabel =
+    race.level !== 'Universal' && race.office !== 'State House' && race.office !== 'State Senate'
+      ? 'Full results, analysis & map →'
+      : 'Full results & map →'
 
   return (
     <div className="flex flex-col">
@@ -46,16 +49,20 @@ export default function RaceCard({ race, showDistrict }: Props) {
         </div>
       </Link>
 
-      {/* DDHQ-style table */}
-      <Link href={`/races/${race.slug}`} className="block hover:shadow-md transition-shadow rounded-lg">
-        <RaceTable race={race} compact />
-      </Link>
+      {/* Table — not a link; candidate names are plain text, not pseudo-links */}
+      <div className="border border-[#c8c8c8] rounded-t-lg overflow-hidden border-b-0">
+        <RaceTable race={race} compact borderless />
+      </div>
 
+      {/* CTA — the single, explicit entry point to the race page */}
       <Link
         href={`/races/${race.slug}`}
-        className="mt-2 text-xs text-[#2e6b3e] hover:underline self-end"
+        className="block text-center text-sm font-bold text-white rounded-b-lg transition-colors"
+        style={{ backgroundColor: '#2e6b3e', padding: '10px 16px' }}
+        onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#1e4d2c')}
+        onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#2e6b3e')}
       >
-        {race.level !== 'Universal' && race.office !== 'State House' && race.office !== 'State Senate' ? 'Full results, analysis & map →' : 'Full results & map →'}
+        {ctaLabel}
       </Link>
     </div>
   )
