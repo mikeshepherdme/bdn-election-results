@@ -194,7 +194,9 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
             const p = total > 0 ? parseFloat(candidatePct(v, total)) : 0
             const isLeader = i === 0 && hasResults
             const isCalled = c.cand_id === calledId && race.called
-            const candColor = colorMap[c.cand_id] ?? partyColor
+            const candColor = race.election_type_id === 9
+              ? (c.party_name === 'Democratic' ? '#1A5FAB' : c.party_name === 'Republican' ? '#CC2929' : '#444444')
+              : (colorMap[c.cand_id] ?? partyColor)
             const photo = candidatePhoto(c.cand_id)
             const photoPosition = candidatePhotoPosition(c.cand_id)
 
