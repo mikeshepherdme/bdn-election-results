@@ -1,6 +1,7 @@
 @import "tailwindcss";
 @import "./bdn-design-system.css";
 
+
 @theme {
   /* BDN brand — aligned with design system tokens */
   --color-bdn-green:       #2e6b3e;
@@ -27,10 +28,10 @@
   --color-border:  #c8c8c8;
   --color-muted:   #767676;
 
-  /* Typography — BDN uses Georgia for headlines, Helvetica Neue for body */
-  --font-headline: Georgia, "Times New Roman", Times, serif;
+  /* Typography — BDN uses Helvetica Neue throughout */
+  --font-headline: "Helvetica Neue", Arial, Helvetica, sans-serif;
   --font-sans:     "Helvetica Neue", Arial, Helvetica, sans-serif;
-  --font-serif:    Georgia, "Times New Roman", Times, serif;
+  --font-serif:    "Helvetica Neue", Arial, Helvetica, sans-serif;
 }
 
 body {
@@ -43,11 +44,27 @@ h1, h2, h3, h4, .font-headline {
   font-family: var(--font-headline);
 }
 
-/* Leaflet — white background so the map floats on the page instead of gray tiles */
-.leaflet-container {
-  background: #ffffff !important;
+/* Race page: 2-col layout (content | map sidebar) */
+.race-page-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+@media (min-width: 768px) {
+  .race-page-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    gap: 2rem;
+    align-items: start;
+  }
 }
 
-.leaflet-control-zoom a {
-  font-family: var(--font-sans) !important;
+/* Sidebar sticks near the top on scroll */
+@media (min-width: 768px) {
+  .race-page-sidebar {
+    position: sticky;
+    top: 1rem;
+    padding-bottom: 1.5rem;
+  }
 }
+

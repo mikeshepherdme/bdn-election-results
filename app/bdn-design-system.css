@@ -201,7 +201,7 @@ a:hover {
   text-transform: uppercase;
   letter-spacing: var(--tracking-widest);
   color: var(--color-bdn-green);
-  border-bottom: 3px solid var(--color-bdn-green);
+  border-bottom: 1px solid #c8c8c8;
   padding-bottom: var(--space-1);
   margin-bottom: var(--space-4);
   display: block;

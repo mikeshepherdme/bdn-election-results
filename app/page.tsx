@@ -1,9 +1,7 @@
 import Link from 'next/link'
 import RaceCard from '@/components/RaceCard'
-import TownSearch from '@/components/TownSearch'
 import { getRaces } from '@/lib/mock-data'
 import type { Race } from '@/lib/types'
-import { flatVcus } from '@/lib/types'
 
 const TOP_LEVELS = new Set(['Statewide', 'Federal', 'Federal/District'])
 
@@ -31,24 +29,8 @@ function pairRaces(races: Race[]): RacePair[] {
   return Object.values(groups)
 }
 
-function lastUpdated(races: Race[]): string {
-  const latest = new Date(Math.max(...races.map(r => new Date(r.last_updated).getTime())))
-  return latest.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'America/New_York' }) + ' ET'
-}
-
-function allTownNames(races: Race[]): string[] {
-  const names = new Set<string>()
-  for (const race of races) {
-    for (const vcu of flatVcus(race)) names.add(vcu.vcu)
-  }
-  return Array.from(names).sort()
-}
-
 export default function HomePage() {
   const races = getRaces()
-  const anyResults = races.some(r => r.topline_results.total_votes > 0)
-  const updated = lastUpdated(races)
-  const towns = allTownNames(races)
 
   // ── Section 1: Statewide & Federal ──────────────────────────────────────────
   const topRaces = races.filter(r => TOP_LEVELS.has(r.level))
@@ -61,6 +43,18 @@ export default function HomePage() {
     if (aScore !== bScore) return aScore - bScore
     return a.label.localeCompare(b.label)
   })
+
+  function raceIsContested(r: Race): boolean {
+    return !r.uncontested && r.candidates.length > 1
+  }
+  // Strip uncontested individual races out of each group; collect them for dropdown
+  const topUncontestedRaces: Race[] = []
+  const topDisplayGroups = topGroups.map(g => {
+    const dem = g.dem && !raceIsContested(g.dem) ? (topUncontestedRaces.push(g.dem), undefined) : g.dem
+    const rep = g.rep && !raceIsContested(g.rep) ? (topUncontestedRaces.push(g.rep), undefined) : g.rep
+    const nonpartisan = g.nonpartisan?.filter(r => raceIsContested(r) || (topUncontestedRaces.push(r), false))
+    return { ...g, dem, rep, nonpartisan }
+  }).filter(g => g.dem || g.rep || (g.nonpartisan && g.nonpartisan.length > 0))
 
   // ── Section 2: State Legislature ────────────────────────────────────────────
   const legRaces = races.filter(r => r.level === 'State/District')
@@ -97,112 +91,122 @@ export default function HomePage() {
 
   const countyContested   = countyRaces.filter(r => !r.uncontested)
   const countyUncontested = countyRaces.filter(r => r.uncontested)
-  const muniContested     = muniRaces.filter(r => !r.uncontested)
-  const muniUncontested   = muniRaces.filter(r => r.uncontested)
 
   const countyGroups = pairRaces(countyContested).sort((a, b) => a.label.localeCompare(b.label))
-  const muniGroups   = pairRaces(muniContested).sort((a, b) => a.label.localeCompare(b.label))
 
   return (
     <>
-      {/* Page header */}
-      <div className="mb-6 border-b border-[#c8c8c8] pb-4">
-        <h1 className="font-headline text-3xl md:text-4xl tracking-tight text-[#1A1A1A]">
-          Maine Primary Election Results
-        </h1>
-        <div className="flex items-center justify-between mt-1 flex-wrap gap-2">
-          <p className="text-[#767676] text-sm">Tuesday, June 9, 2026</p>
-          {anyResults && (
-            <p className="text-xs text-[#767676]">Updated {updated}</p>
-          )}
-        </div>
-      </div>
-
-      {/* Pre-election state */}
-      {!anyResults && (
-        <div className="bg-[#f2f2f2] border border-[#c8c8c8] rounded-lg p-6 mb-8 text-center">
-          <p className="text-lg font-bold text-[#1A1A1A]">Polls close at 8 p.m.</p>
-          <p className="text-[#767676] text-sm mt-1">Results will appear here as precincts report.</p>
-        </div>
-      )}
-
-      <div className="space-y-10">
+      <div className="space-y-10" style={{ paddingTop: '2rem' }}>
 
         {/* ── Statewide & Federal ──────────────────────────────────────────── */}
-        <section>
+        <section id="statewide">
           <span className="section-label">Statewide &amp; Federal</span>
           <div className="space-y-6">
-            {topGroups.map(group => (
-              <div key={group.label}>
-                <h3 className="font-headline text-xl tracking-tight mb-3">{group.label}</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                  {group.dem && <RaceCard race={group.dem} />}
-                  {group.rep && <RaceCard race={group.rep} />}
-                  {group.nonpartisan?.map(r => <RaceCard key={r.race_id} race={r} />)}
-                  {!group.dem && !group.nonpartisan && (
-                    <UncontestedSlot party="Democratic" />
+            {(() => {
+              // Groups with both sides contested render as their own row
+              const paired = topDisplayGroups.filter(g => {
+                const cards = [g.dem, g.rep, ...(g.nonpartisan ?? [])].filter(Boolean)
+                return cards.length >= 2
+              })
+              // Groups with only one contested card flow into a shared grid, Dem first
+              const solo = topDisplayGroups
+                .filter(g => {
+                  const cards = [g.dem, g.rep, ...(g.nonpartisan ?? [])].filter(Boolean)
+                  return cards.length === 1
+                })
+                .sort((a, b) => {
+                  const aParty = a.dem ? 0 : 1
+                  const bParty = b.dem ? 0 : 1
+                  if (aParty !== bParty) return aParty - bParty
+                  return a.label.localeCompare(b.label)
+                })
+
+              return (
+                <>
+                  {paired.map(group => (
+                    <div key={group.label}>
+                      <h3 className="font-headline text-xl font-bold tracking-tight mb-3">{group.label}</h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                        {group.dem && <RaceCard race={group.dem} />}
+                        {group.rep && <RaceCard race={group.rep} />}
+                        {group.nonpartisan?.map(r => <RaceCard key={r.race_id} race={r} />)}
+                      </div>
+                    </div>
+                  ))}
+                  {solo.length > 0 && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                      {solo.map(group => {
+                        const card = (group.dem ?? group.rep ?? group.nonpartisan?.[0])!
+                        return (
+                          <div key={group.label}>
+                            <h3 className="font-headline text-xl font-bold tracking-tight mb-3">{group.label}</h3>
+                            <RaceCard race={card} />
+                          </div>
+                        )
+                      })}
+                    </div>
                   )}
-                  {!group.rep && !group.nonpartisan && (
-                    <UncontestedSlot party="Republican" />
-                  )}
-                </div>
-              </div>
-            ))}
+                </>
+              )
+            })()}
+            {topUncontestedRaces.length > 0 && (
+              <UncontestedList races={topUncontestedRaces} label="uncontested statewide & federal races" />
+            )}
           </div>
         </section>
 
         {/* ── State Legislature ─────────────────────────────────────────────── */}
         {(senatePairs.length > 0 || housePairs.length > 0) && (
-          <section>
+          <section id="legislature">
             <span className="section-label">State Legislature</span>
             <div className="space-y-8">
 
               {senatePairs.length > 0 && (
                 <div>
-                  <h3 className="font-headline text-lg tracking-tight mb-3 text-[#444444]">
+                  <h3 className="font-headline text-lg font-bold tracking-tight mb-3 text-[#444444]">
                     State Senate — Contested Primaries
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     {senatePairs.map(pair => (
                       pair.dem
-                        ? <RaceCard key={pair.dem.race_id} race={pair.dem} />
+                        ? <RaceCard key={pair.dem.race_id} race={pair.dem} showDistrict />
                         : pair.rep
-                          ? <RaceCard key={pair.rep!.race_id} race={pair.rep!} />
+                          ? <RaceCard key={pair.rep!.race_id} race={pair.rep!} showDistrict />
                           : null
                     ))}
                   </div>
                   {senateUncontested.length > 0 && (
-                    <UncontestedList races={senateUncontested} label="uncontested Senate districts" />
+                    <UncontestedList races={senateUncontested} label="uncontested Senate races" />
                   )}
                 </div>
               )}
 
               {housePairs.length > 0 && (
                 <div>
-                  <h3 className="font-headline text-lg tracking-tight mb-3 text-[#444444]">
+                  <h3 className="font-headline text-lg font-bold tracking-tight mb-3 text-[#444444]">
                     State House — Contested Primaries
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
                     {housePairs.map(pair => (
                       pair.dem
-                        ? <RaceCard key={pair.dem.race_id} race={pair.dem} />
+                        ? <RaceCard key={pair.dem.race_id} race={pair.dem} showDistrict />
                         : pair.rep
-                          ? <RaceCard key={pair.rep!.race_id} race={pair.rep!} />
+                          ? <RaceCard key={pair.rep!.race_id} race={pair.rep!} showDistrict />
                           : null
                     ))}
                   </div>
                   {houseUncontested.length > 0 && (
-                    <UncontestedList races={houseUncontested} label="uncontested House districts" />
+                    <UncontestedList races={houseUncontested} label="uncontested House races" />
                   )}
                 </div>
               )}
 
               {/* Fully uncontested chambers (no contested districts) */}
               {senatePairs.length === 0 && senateUncontested.length > 0 && (
-                <UncontestedList races={senateUncontested} label="uncontested State Senate districts" />
+                <UncontestedList races={senateUncontested} label="uncontested State Senate races" />
               )}
               {housePairs.length === 0 && houseUncontested.length > 0 && (
-                <UncontestedList races={houseUncontested} label="uncontested State House districts" />
+                <UncontestedList races={houseUncontested} label="uncontested State House races" />
               )}
             </div>
           </section>
@@ -210,12 +214,12 @@ export default function HomePage() {
 
         {/* ── County & District Attorney ───────────────────────────────────── */}
         {countyRaces.length > 0 && (
-          <section>
+          <section id="county">
             <span className="section-label">County &amp; District Attorney</span>
             <div className="space-y-4">
               {countyGroups.map(group => (
                 <div key={group.label}>
-                  <h3 className="font-headline text-lg tracking-tight mb-3 text-[#444444]">
+                  <h3 className="font-headline text-lg font-bold tracking-tight mb-3 text-[#444444]">
                     {group.label}
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
@@ -232,40 +236,9 @@ export default function HomePage() {
           </section>
         )}
 
-        {/* ── Municipal ────────────────────────────────────────────────────── */}
-        {muniRaces.length > 0 && (
-          <section>
-            <span className="section-label">Municipal</span>
-            <div className="space-y-4">
-              {muniGroups.map(group => (
-                <div key={group.label}>
-                  <h3 className="font-headline text-lg tracking-tight mb-3 text-[#444444]">
-                    {group.label}
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-                    {group.dem && <RaceCard race={group.dem} />}
-                    {group.rep && <RaceCard race={group.rep} />}
-                    {group.nonpartisan?.map(r => <RaceCard key={r.race_id} race={r} />)}
-                  </div>
-                </div>
-              ))}
-              {muniUncontested.length > 0 && (
-                <UncontestedList races={muniUncontested} label="uncontested municipal races" />
-              )}
-            </div>
-          </section>
-        )}
 
       </div>
 
-      {/* Town search */}
-      <div className="mt-10 bg-[#d6ead9] border border-[#2e6b3e]/20 rounded-lg p-5">
-        <span className="section-label" style={{ borderBottom: 'none', marginBottom: 'var(--space-2)' }}>Find your town</span>
-        <p className="text-sm text-[#1A1A1A] mb-3">
-          See results for every race in a specific Maine municipality.
-        </p>
-        <TownSearch towns={towns} />
-      </div>
     </>
   )
 }

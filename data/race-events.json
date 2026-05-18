@@ -1,0 +1,424 @@
+{
+  "governor-democratic-primary": [
+    {
+      "id": "16f9783b-2ed0-41fa-a9ec-02110b6b30cb",
+      "created_at": "2026-05-17T00:59:19.047Z",
+      "category": "milestone",
+      "condition_key": "milestone-10",
+      "text": "🏃 10% of estimated votes are in. Angus King leads with 37.1%, 15.6 points ahead of Hannah Pingree (21.5%)."
+    },
+    {
+      "id": "b50fd922-f00c-4424-81dc-675e334bdf7b",
+      "created_at": "2026-05-17T00:59:19.047Z",
+      "category": "milestone",
+      "condition_key": "milestone-20",
+      "text": "🏃 20% of estimated votes are in. Angus King leads with 37.1%, 15.6 points ahead of Hannah Pingree (21.5%)."
+    },
+    {
+      "id": "06068dcf-9436-422e-9a80-27a005a38375",
+      "created_at": "2026-05-17T00:59:19.047Z",
+      "category": "milestone",
+      "condition_key": "milestone-30",
+      "text": "🏃 30% of estimated votes are in. Angus King leads with 37.1%, 15.6 points ahead of Hannah Pingree (21.5%)."
+    },
+    {
+      "id": "e38d59c5-b934-4878-8337-931f3a86c71f",
+      "created_at": "2026-05-17T00:59:19.047Z",
+      "category": "milestone",
+      "condition_key": "milestone-40",
+      "text": "🏃 40% of estimated votes are in. Angus King leads with 37.1%, 15.6 points ahead of Hannah Pingree (21.5%)."
+    },
+    {
+      "id": "b34d823e-79d1-4d85-a122-18b3da5a6890",
+      "created_at": "2026-05-17T00:59:19.047Z",
+      "category": "milestone",
+      "condition_key": "milestone-50",
+      "text": "🏃 50% of estimated votes are in. Angus King leads with 37.1%, 15.6 points ahead of Hannah Pingree (21.5%)."
+    },
+    {
+      "id": "a0c77705-2409-4835-81ae-f9092106446b",
+      "created_at": "2026-05-17T00:59:19.047Z",
+      "category": "milestone",
+      "condition_key": "milestone-60",
+      "text": "🏃 60% of estimated votes are in. Angus King leads with 37.1%, 15.6 points ahead of Hannah Pingree (21.5%)."
+    },
+    {
+      "id": "efdd8c53-b0ad-4c4a-b724-815cc4845ea7",
+      "created_at": "2026-05-17T00:59:19.047Z",
+      "category": "milestone",
+      "condition_key": "milestone-70",
+      "text": "🏃 70% of estimated votes are in. Angus King leads with 37.1%, 15.6 points ahead of Hannah Pingree (21.5%)."
+    },
+    {
+      "id": "3f7dfd83-d8ce-4779-8472-d575b66db8ed",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Caribou",
+      "text": "🔔 Bellwether: Caribou is in — the 8th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 27.0% of 100 votes cast."
+    },
+    {
+      "id": "f3279e2b-c2a3-4a84-aaee-27cdd361a512",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Fort Fairfield",
+      "text": "🔔 Bellwether: Fort Fairfield is in — the 14th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 38.0% of 108 votes cast."
+    },
+    {
+      "id": "82b9da3f-f4c6-463d-8654-6ecb77cb778d",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Houlton",
+      "text": "🔔 Bellwether: Houlton is in — the 5th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 48.0% of 127 votes cast."
+    },
+    {
+      "id": "af430692-fbe1-4ff5-a5a5-6511bd54a1c4",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Madawaska",
+      "text": "🔔 Bellwether: Madawaska is in — the 7th of 20 towns that most closely mirrored 2018 primary results. Nirav Shah leads with 33.8% of 145 votes cast."
+    },
+    {
+      "id": "1704ce26-de66-4c99-ad45-102929fe1277",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Edgecomb",
+      "text": "🔔 Bellwether: Edgecomb is in — the 1st of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 32.2% of 118 votes cast."
+    },
+    {
+      "id": "fbaf710d-f025-48e2-a2b5-81d5961017fa",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Newcastle",
+      "text": "🔔 Bellwether: Newcastle is in — the 16th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 36.4% of 154 votes cast."
+    },
+    {
+      "id": "014553b1-6371-403a-9ab8-12e397295618",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Orland",
+      "text": "🔔 Bellwether: Orland is in — the 20th of 20 towns that most closely mirrored 2018 primary results. Nirav Shah leads with 33.9% of 236 votes cast."
+    },
+    {
+      "id": "04dda295-0712-4c4e-85c1-034a6b999411",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Trenton",
+      "text": "🔔 Bellwether: Trenton is in — the 12th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 38.4% of 289 votes cast."
+    },
+    {
+      "id": "552be8dd-60a4-4731-8c2c-ad2f48a29b00",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Auburn",
+      "text": "🔔 Bellwether: Auburn is in — the 2nd of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 42.5% of 134 votes cast."
+    },
+    {
+      "id": "413fc860-a3de-41aa-a327-06601686ad72",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Durham",
+      "text": "🔔 Bellwether: Durham is in — the 15th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 36.4% of 121 votes cast."
+    },
+    {
+      "id": "29ce621a-6ffe-4510-9c20-9b3f21019882",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Leeds",
+      "text": "🔔 Bellwether: Leeds is in — the 6th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 39.8% of 196 votes cast."
+    },
+    {
+      "id": "dfd065f2-91b9-42cc-94f5-08aaf14d5d65",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Gray",
+      "text": "🔔 Bellwether: Gray is in — the 10th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 54.3% of 105 votes cast."
+    },
+    {
+      "id": "22e2ed06-d48a-466f-9623-e1141e71e84b",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Scarborough",
+      "text": "🔔 Bellwether: Scarborough is in — the 9th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 43.7% of 435 votes cast."
+    },
+    {
+      "id": "30d044a5-0618-4345-9186-11dc5fdc5797",
+      "created_at": "2026-05-17T00:59:19.048Z",
+      "category": "ai",
+      "condition_key": "bellwether-Sebago",
+      "text": "🔔 Bellwether: Sebago is in — the 13th of 20 towns that most closely mirrored 2018 primary results. Angus King leads with 53.9% of 178 votes cast."
+    },
+    {
+      "id": "96ede7d1-d6a4-4e02-aa62-5fece83c2f47",
+      "created_at": "2026-05-17T12:08:25.945Z",
+      "text": "test test test",
+      "category": "note",
+      "author": "Michael Shepherd"
+    },
+    {
+      "id": "ddc9e3cf-ecdd-43a8-b958-92272c0a7340",
+      "created_at": "2026-05-17T16:24:55.663Z",
+      "text": "",
+      "category": "story",
+      "url": "https://www.bangordailynews.com/2026/05/15/midcoast/midcoast-police-courts/what-we-know-searsmont-lumber-mill-fire/",
+      "story_meta": {
+        "title": "Here’s what we know about how Friday’s deadly fire at a Searsmont lumber mill spread",
+        "image": "https://i0.wp.com/bdn-data.s3.amazonaws.com/uploads/2026/05/Searsmont-mill-fire-2-5.15.26-2.jpg?fit=1200%2C900&ssl=1",
+        "description": "An explosion killed one firefighter, and at least 11 people were taken to hospitals across the state."
+      }
+    }
+  ],
+  "governor-republican-primary": [
+    {
+      "id": "79471936-9b3a-42b2-9029-8123f622c439",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "call",
+      "condition_key": "call-950903",
+      "text": "✅ Garrett Mason wins, per a BDN and Decision Desk HQ call."
+    },
+    {
+      "id": "48ca2e86-14cf-472f-be31-046a031e7e60",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "milestone",
+      "condition_key": "milestone-10",
+      "text": "🏃 10% of estimated votes are in. Garrett Mason leads with 35.3%, 12.6 points ahead of Jonathan Bush (22.7%)."
+    },
+    {
+      "id": "30b72976-3d10-40ed-8f14-0058a4c7fd13",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "milestone",
+      "condition_key": "milestone-20",
+      "text": "🏃 20% of estimated votes are in. Garrett Mason leads with 35.3%, 12.6 points ahead of Jonathan Bush (22.7%)."
+    },
+    {
+      "id": "c95a1e98-a11b-4b63-9f75-5eba51127bd8",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "milestone",
+      "condition_key": "milestone-30",
+      "text": "🏃 30% of estimated votes are in. Garrett Mason leads with 35.3%, 12.6 points ahead of Jonathan Bush (22.7%)."
+    },
+    {
+      "id": "942db6f7-090c-4006-a514-79c9a5751f7b",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "milestone",
+      "condition_key": "milestone-40",
+      "text": "🏃 40% of estimated votes are in. Garrett Mason leads with 35.3%, 12.6 points ahead of Jonathan Bush (22.7%)."
+    },
+    {
+      "id": "35b4ff61-9264-47c0-908f-9cbbd5d37a59",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "milestone",
+      "condition_key": "milestone-50",
+      "text": "🏃 50% of estimated votes are in. Garrett Mason leads with 35.3%, 12.6 points ahead of Jonathan Bush (22.7%)."
+    },
+    {
+      "id": "cde888a8-42b0-4a66-95af-c388fe247219",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "milestone",
+      "condition_key": "milestone-60",
+      "text": "🏃 60% of estimated votes are in. Garrett Mason leads with 35.3%, 12.6 points ahead of Jonathan Bush (22.7%)."
+    },
+    {
+      "id": "dccd7b02-4e87-4a57-a24b-9ca197c142da",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "milestone",
+      "condition_key": "milestone-70",
+      "text": "🏃 70% of estimated votes are in. Garrett Mason leads with 35.3%, 12.6 points ahead of Jonathan Bush (22.7%)."
+    },
+    {
+      "id": "bb2a16f7-db51-4b3a-9c9b-359290c6fa27",
+      "created_at": "2026-05-17T00:33:21.393Z",
+      "category": "milestone",
+      "condition_key": "milestone-80",
+      "text": "🏃 80% of estimated votes are in. Garrett Mason leads with 35.3%, 12.6 points ahead of Jonathan Bush (22.7%)."
+    },
+    {
+      "id": "a1b2c3d4-0001-4000-8000-000000000001",
+      "created_at": "2026-05-17T00:38:05.000Z",
+      "category": "ai",
+      "condition_key": "bigdrop-Portland",
+      "text": "🧳 Portland is in — 4,218 votes cast. Garrett Mason leads with 34.1%, ahead of Jonathan Bush (23.8%)."
+    },
+    {
+      "id": "a1b2c3d4-0002-4000-8000-000000000002",
+      "created_at": "2026-05-17T00:39:11.000Z",
+      "category": "ai",
+      "condition_key": "bigdrop-Lewiston",
+      "text": "🧳 Lewiston is in — 3,104 votes cast. Garrett Mason leads with 38.6%, ahead of Owen McCarthy (21.3%)."
+    },
+    {
+      "id": "a1b2c3d4-0003-4000-8000-000000000003",
+      "created_at": "2026-05-17T00:40:44.000Z",
+      "category": "ai",
+      "condition_key": "bigdrop-Bangor",
+      "text": "🧳 Bangor is in — 2,871 votes cast. Garrett Mason leads with 41.2%, ahead of Jonathan Bush (19.7%)."
+    },
+    {
+      "id": "a1b2c3d4-0004-4000-8000-000000000004",
+      "created_at": "2026-05-17T00:41:58.000Z",
+      "category": "ai",
+      "condition_key": "bigdrop-Auburn",
+      "text": "🧳 Auburn is in — 2,543 votes cast. Garrett Mason leads with 36.9%, ahead of Owen McCarthy (22.4%)."
+    },
+    {
+      "id": "a1b2c3d4-0005-4000-8000-000000000005",
+      "created_at": "2026-05-17T00:43:03.000Z",
+      "category": "ai",
+      "condition_key": "bigdrop-Scarborough",
+      "text": "🧳 Scarborough is in — 2,209 votes cast. Jonathan Bush leads with 28.3%, ahead of Garrett Mason (27.1%)."
+    },
+    {
+      "id": "3e50b74c-2446-4717-a309-499634c70a13",
+      "created_at": "2026-05-17T00:33:21.394Z",
+      "category": "ai",
+      "condition_key": "bellwether-Lebanon",
+      "text": "🔔 Bellwether: Lebanon is in — the 8th of 20 towns that most closely mirrored 2018 primary results. Jonathan Bush leads with 30.6% of 386 votes cast."
+    },
+    {
+      "id": "7ecdb801-99d8-4f20-968f-3260217a6db6",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Norway",
+      "text": "🔔 Bellwether: Norway is in — the 3rd of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 42.1% of 107 votes cast."
+    },
+    {
+      "id": "da0dbce1-bab0-47e4-b633-9752d676ca02",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Albion",
+      "text": "🔔 Bellwether: Albion is in — the 19th of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 39.5% of 177 votes cast."
+    },
+    {
+      "id": "f1626bfa-f7fb-47d5-bb7d-eb8d05d65946",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Augusta",
+      "text": "🔔 Bellwether: Augusta is in — the 17th of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 32.2% of 171 votes cast."
+    },
+    {
+      "id": "b01247e5-8a64-4135-879e-a2448cc55838",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Chelsea",
+      "text": "🔔 Bellwether: Chelsea is in — the 5th of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 41.2% of 238 votes cast."
+    },
+    {
+      "id": "862b20c1-4bf1-4065-baf6-0b67ab4a229c",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Gardiner",
+      "text": "🔔 Bellwether: Gardiner is in — the 1st of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 38.3% of 188 votes cast."
+    },
+    {
+      "id": "dd691651-2f11-498a-b330-a3375e58bb47",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Manchester",
+      "text": "🔔 Bellwether: Manchester is in — the 13th of 20 towns that most closely mirrored 2018 primary results. Jonathan Bush leads with 25.5% of 458 votes cast."
+    },
+    {
+      "id": "9680965a-34dc-4734-b570-2e9db7571a8c",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Vassalboro",
+      "text": "🔔 Bellwether: Vassalboro is in — the 12th of 20 towns that most closely mirrored 2018 primary results. Jonathan Bush leads with 30.9% of 311 votes cast."
+    },
+    {
+      "id": "94852c23-79bd-4008-9e0e-555ede980a25",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Winthrop",
+      "text": "🔔 Bellwether: Winthrop is in — the 7th of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 40.2% of 311 votes cast."
+    },
+    {
+      "id": "e480b78e-b84c-4727-b229-2a850d6e35bd",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Caribou",
+      "text": "🔔 Bellwether: Caribou is in — the 6th of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 39.4% of 284 votes cast."
+    },
+    {
+      "id": "c81e3ae5-63ba-4f00-aba7-5cd716b5386a",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Bath",
+      "text": "🔔 Bellwether: Bath is in — the 20th of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 32.1% of 168 votes cast."
+    },
+    {
+      "id": "d6f351b9-b6d9-41e0-8b9d-ee0d11b5ae96",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Richmond",
+      "text": "🔔 Bellwether: Richmond is in — the 2nd of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 36.0% of 214 votes cast."
+    },
+    {
+      "id": "e393c85d-f5db-444d-a42f-7d1ef4b551bf",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Woolwich",
+      "text": "🔔 Bellwether: Woolwich is in — the 11th of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 42.5% of 181 votes cast."
+    },
+    {
+      "id": "489e17d3-edf5-4837-a80d-e2aade6569d0",
+      "created_at": "2026-05-17T00:33:21.396Z",
+      "category": "ai",
+      "condition_key": "bellwether-Freeport",
+      "text": "🔔 Bellwether: Freeport is in — the 4th of 20 towns that most closely mirrored 2018 primary results. Garrett Mason leads with 36.8% of 212 votes cast."
+    },
+    {
+      "id": "a38e0f51-d1be-4abc-ade7-1c935f49a558",
+      "created_at": "2026-05-17T16:43:28.863Z",
+      "text": "",
+      "category": "story",
+      "url": "https://www.bangordailynews.com/2026/05/15/midcoast/midcoast-police-courts/what-we-know-searsmont-lumber-mill-fire/",
+      "story_meta": {
+        "title": "Here’s what we know about how Friday’s deadly fire at a Searsmont lumber mill spread",
+        "image": "https://i0.wp.com/bdn-data.s3.amazonaws.com/uploads/2026/05/Searsmont-mill-fire-2-5.15.26-2.jpg?fit=1200%2C900&ssl=1",
+        "description": "An explosion killed one firefighter, and at least 11 people were taken to hospitals across the state."
+      }
+    }
+  ],
+  "us-house-district-2-democratic-primary": [
+    {
+      "id": "aef1bfe0-e6a7-49e6-bc78-5ae298e784d6",
+      "created_at": "2026-05-17T00:48:49.765Z",
+      "category": "milestone",
+      "condition_key": "milestone-10",
+      "text": "🏃 10% of estimated votes are in. Matthew Dunlap leads with 32.4%, 5.9 points ahead of Joseph Baldacci (26.5%)."
+    },
+    {
+      "id": "308b07be-892e-4eeb-82ee-13d72c6e3ad7",
+      "created_at": "2026-05-17T00:48:49.765Z",
+      "category": "milestone",
+      "condition_key": "milestone-20",
+      "text": "🏃 20% of estimated votes are in. Matthew Dunlap leads with 32.4%, 5.9 points ahead of Joseph Baldacci (26.5%)."
+    },
+    {
+      "id": "a434ec94-05bf-4991-b5f4-1f2661b1889b",
+      "created_at": "2026-05-17T00:48:49.765Z",
+      "category": "milestone",
+      "condition_key": "milestone-30",
+      "text": "🏃 30% of estimated votes are in. Matthew Dunlap leads with 32.4%, 5.9 points ahead of Joseph Baldacci (26.5%)."
+    },
+    {
+      "id": "bef8fee2-746b-4448-9af0-c02c867b2744",
+      "created_at": "2026-05-17T00:48:49.765Z",
+      "category": "milestone",
+      "condition_key": "milestone-40",
+      "text": "🏃 40% of estimated votes are in. Matthew Dunlap leads with 32.4%, 5.9 points ahead of Joseph Baldacci (26.5%)."
+    },
+    {
+      "id": "b80a0944-1997-4e59-8bc6-dfbc8fb11015",
+      "created_at": "2026-05-17T00:48:49.765Z",
+      "category": "milestone",
+      "condition_key": "milestone-50",
+      "text": "🏃 50% of estimated votes are in. Matthew Dunlap leads with 32.4%, 5.9 points ahead of Joseph Baldacci (26.5%)."
+    },
+    {
+      "id": "7336bae1-b166-45ff-ba50-850f81b602c3",
+      "created_at": "2026-05-17T00:48:49.765Z",
+      "category": "milestone",
+      "condition_key": "milestone-60",
+      "text": "🏃 60% of estimated votes are in. Matthew Dunlap leads with 32.4%, 5.9 points ahead of Joseph Baldacci (26.5%)."
+    }
+  ]
+}

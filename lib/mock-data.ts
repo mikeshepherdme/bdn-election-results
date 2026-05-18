@@ -90,27 +90,22 @@ function transform(r: any): Race {
   }
 }
 
-let _races: Race[] | null = null
-
-function getRacesOnce(): Race[] {
-  if (!_races) {
-    const raw = JSON.parse(readFileSync(join(process.cwd(), 'data/ddhq_races.json'), 'utf-8'))
-    _races = raw.map(transform)
-  }
-  return _races!
+function loadRaces(): Race[] {
+  const raw = JSON.parse(readFileSync(join(process.cwd(), 'data/ddhq_races.json'), 'utf-8'))
+  return raw.map(transform)
 }
 
 export function getRaces(): Race[] {
-  return getRacesOnce()
+  return loadRaces()
 }
 
 export function getRace(slugOrId: string): Race | undefined {
-  return getRacesOnce().find(r => r.slug === slugOrId || String(r.race_id) === slugOrId)
+  return loadRaces().find(r => r.slug === slugOrId || String(r.race_id) === slugOrId)
 }
 
 export function getTownRaces(townSlug: string): { race: Race; vcu: Vcu & { county: string } }[] {
   const results: { race: Race; vcu: Vcu & { county: string } }[] = []
-  for (const race of getRacesOnce()) {
+  for (const race of loadRaces()) {
     for (const c of race.counties) {
       for (const v of c.vcus) {
         const s = v.vcu.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')

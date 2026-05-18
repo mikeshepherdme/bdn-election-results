@@ -2,3 +2,6 @@
 .env
 node_modules/
 .next/
+tsconfig.tsbuildinfo
+races/
+towns/

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import type { Race, Vcu } from '@/lib/types'
 import { candidatePct } from '@/lib/types'
@@ -10,14 +10,26 @@ interface Props {
   townRows: (Vcu & { county: string })[]
   sortedCands: Race['candidates']
   colorMap: Record<number, string>
+  showAllTowns?: boolean
 }
 
-type SortKey = 'name' | 'total' | number  // number = cand_id
+type SortKey = 'name' | 'total' | number
 
-export default function MunicipalityView({ race, townRows, sortedCands, colorMap }: Props) {
+const PAGE_SIZE = 20
+
+export default function MunicipalityView({ race, townRows, sortedCands, colorMap, showAllTowns }: Props) {
+  const hasAnyResults = race.topline_results.total_votes > 0
   const [search, setSearch] = useState('')
-  const [sortKey, setSortKey] = useState<SortKey>('total')
-  const [sortDir, setSortDir] = useState<'desc' | 'asc'>('desc')
+  const [sortKey, setSortKey] = useState<SortKey>(() =>
+    showAllTowns && !race.topline_results.total_votes ? 'name' : 'total'
+  )
+  const [sortDir, setSortDir] = useState<'desc' | 'asc'>(() =>
+    showAllTowns && !race.topline_results.total_votes ? 'asc' : 'desc'
+  )
+  const [page, setPage] = useState(1)
+
+  // Reset to page 1 whenever search or sort changes
+  useEffect(() => { setPage(1) }, [search, sortKey, sortDir])
 
   function handleSort(key: SortKey) {
     if (sortKey === key) {
@@ -33,39 +45,49 @@ export default function MunicipalityView({ race, townRows, sortedCands, colorMap
     return <span className="ml-1">{sortDir === 'desc' ? '↓' : '↑'}</span>
   }
 
-  const filtered = townRows
+  const withVotes = townRows.filter(vcu =>
+    Object.values(vcu.votes).reduce((s, v) => s + v, 0) > 0
+  )
+
+  const displayRows = showAllTowns ? townRows : withVotes
+
+  const filtered = displayRows
     .filter(vcu =>
+      !search ||
       vcu.vcu.toLowerCase().includes(search.toLowerCase()) ||
       vcu.county.toLowerCase().includes(search.toLowerCase())
     )
     .sort((a, b) => {
-      let aVal: number, bVal: number
       if (sortKey === 'name') {
         return sortDir === 'asc'
           ? a.vcu.localeCompare(b.vcu)
           : b.vcu.localeCompare(a.vcu)
       }
+      const aTotal = Object.values(a.votes).reduce((s, v) => s + v, 0)
+      const bTotal = Object.values(b.votes).reduce((s, v) => s + v, 0)
+      // Towns with no votes always sort to bottom regardless of direction
+      if (aTotal === 0 && bTotal === 0) return a.vcu.localeCompare(b.vcu)
+      if (aTotal === 0) return 1
+      if (bTotal === 0) return -1
+      let aVal: number, bVal: number
       if (sortKey === 'total') {
-        aVal = Object.values(a.votes).reduce((s, v) => s + v, 0)
-        bVal = Object.values(b.votes).reduce((s, v) => s + v, 0)
+        aVal = aTotal
+        bVal = bTotal
       } else {
-        // sort by candidate pct in each town
-        const aTotal = Object.values(a.votes).reduce((s, v) => s + v, 0)
-        const bTotal = Object.values(b.votes).reduce((s, v) => s + v, 0)
-        aVal = aTotal > 0 ? (a.votes[String(sortKey)] ?? 0) / aTotal : 0
-        bVal = bTotal > 0 ? (b.votes[String(sortKey)] ?? 0) / bTotal : 0
+        aVal = (a.votes[String(sortKey)] ?? 0) / aTotal
+        bVal = (b.votes[String(sortKey)] ?? 0) / bTotal
       }
       return sortDir === 'desc' ? bVal - aVal : aVal - bVal
     })
 
-  const hasResults = race.topline_results.total_votes > 0
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  const paginated = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+  const reportingCount = withVotes.length
 
   return (
     <div className="bg-white border border-[#c8c8c8] rounded-lg overflow-hidden">
       <div className="px-4 py-3 border-b border-[#c8c8c8] flex items-center gap-3 flex-wrap">
-        <h2 className="text-sm font-semibold text-[#444444]">
-          Municipality Results
-        </h2>
+        <h2 className="text-sm font-semibold text-[#444444]">Town-by-Town Results</h2>
         <div className="ml-auto">
           <input
             type="text"
@@ -95,10 +117,8 @@ export default function MunicipalityView({ race, townRows, sortedCands, colorMap
                   onClick={() => handleSort(c.cand_id)}
                 >
                   <span className="flex items-center justify-end gap-1">
-                    <span
-                      className="w-2 h-2 rounded-sm inline-block shrink-0"
-                      style={{ backgroundColor: colorMap[c.cand_id] }}
-                    />
+                    <span className="w-2 h-2 rounded-sm inline-block shrink-0"
+                      style={{ backgroundColor: colorMap[c.cand_id] }} />
                     {c.last_name}
                     {sortIcon(c.cand_id)}
                   </span>
@@ -113,14 +133,14 @@ export default function MunicipalityView({ race, townRows, sortedCands, colorMap
             </tr>
           </thead>
           <tbody className="divide-y divide-[#f2f2f2]">
-            {filtered.length === 0 ? (
+            {paginated.length === 0 ? (
               <tr>
                 <td colSpan={sortedCands.length + 2} className="px-4 py-6 text-center text-sm text-[#767676]">
                   {search ? `No towns match "${search}"` : 'No results yet'}
                 </td>
               </tr>
             ) : (
-              filtered.map(vcu => {
+              paginated.map(vcu => {
                 const total = Object.values(vcu.votes).reduce((s, v) => s + v, 0)
                 const maxVotes = Math.max(...sortedCands.map(c => vcu.votes[String(c.cand_id)] ?? 0))
                 const townSlug = vcu.vcu.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -144,21 +164,21 @@ export default function MunicipalityView({ race, townRows, sortedCands, colorMap
                           className="text-right px-3 py-2 tabular-nums"
                           style={isSortCol ? { backgroundColor: '#f2f2f2' } : {}}
                         >
-                          {hasResults ? (
+                          {total === 0 ? (
+                            <span className="text-[#c8c8c8]">—</span>
+                          ) : (
                             <span
-                              className={`${isTop ? 'font-bold' : ''}`}
+                              className={isTop ? 'font-bold' : ''}
                               style={isTop ? { color: colorMap[c.cand_id] } : { color: '#767676' }}
                             >
                               {p.toFixed(1)}%
                             </span>
-                          ) : (
-                            <span className="text-[#c8c8c8]">—</span>
                           )}
                         </td>
                       )
                     })}
                     <td className="text-right px-4 py-2 text-[#767676] tabular-nums text-xs">
-                      {total > 0 ? total.toLocaleString() : '—'}
+                      {total > 0 ? total.toLocaleString() : <span className="text-[#c8c8c8]">—</span>}
                     </td>
                   </tr>
                 )
@@ -168,12 +188,39 @@ export default function MunicipalityView({ race, townRows, sortedCands, colorMap
         </table>
       </div>
 
-      <div className="px-4 py-2 border-t border-[#f2f2f2] text-xs text-[#767676]">
-        {filtered.length} of {townRows.length} municipalities
-        {sortKey !== 'total' && sortKey !== 'name' && (
-          <span className="ml-2">
-            · Sorted by {sortedCands.find(c => c.cand_id === sortKey)?.last_name}
-          </span>
+      {/* Footer: count + pagination */}
+      <div className="px-4 py-2 border-t border-[#f2f2f2] flex items-center gap-3 text-xs text-[#767676]">
+        <span>
+          {filtered.length === 0
+            ? 'No results yet'
+            : showAllTowns
+              ? hasAnyResults
+                ? `${reportingCount} of ${filtered.length} municipalities reporting`
+                : `${filtered.length} municipalities in district — no results yet`
+              : `${filtered.length} municipalities reporting`}
+          {sortKey !== 'total' && sortKey !== 'name' && reportingCount > 0 && (
+            <span className="ml-1">· Sorted by {sortedCands.find(c => c.cand_id === sortKey)?.last_name}</span>
+          )}
+        </span>
+
+        {totalPages > 1 && (
+          <div className="ml-auto flex items-center gap-1">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-2 py-0.5 rounded border border-[#c8c8c8] disabled:opacity-40 hover:border-[#2e6b3e] hover:text-[#2e6b3e] disabled:hover:border-[#c8c8c8] disabled:hover:text-[#767676] transition-colors"
+            >
+              ←
+            </button>
+            <span className="px-2">{page} / {totalPages}</span>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-2 py-0.5 rounded border border-[#c8c8c8] disabled:opacity-40 hover:border-[#2e6b3e] hover:text-[#2e6b3e] disabled:hover:border-[#c8c8c8] disabled:hover:text-[#767676] transition-colors"
+            >
+              →
+            </button>
+          </div>
         )}
       </div>
     </div>

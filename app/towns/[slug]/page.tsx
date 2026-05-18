@@ -1,7 +1,26 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import { getTownRaces, getRaces } from '@/lib/mock-data'
-import { candidatePct, flatVcus } from '@/lib/types'
+import { candidatePct, sortCandidates } from '@/lib/types'
+import type { Race } from '@/lib/types'
+import UncontestedToggle from '@/components/UncontestedToggle'
+
+const OFFICE_PRIORITY: Record<string, number> = {
+  'Governor':    0,
+  'US Senate':   1,
+  'US House':    2,
+  'State Senate':3,
+  'State House': 4,
+}
+
+function officePriority(office: string): number {
+  return OFFICE_PRIORITY[office] ?? 99
+}
+
+function isContested(race: Race): boolean {
+  return !race.uncontested && race.candidates.length > 1
+}
 
 export function generateStaticParams() {
   const slugs = new Set<string>()
@@ -19,6 +38,49 @@ interface Props {
   params: Promise<{ slug: string }>
 }
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params
+  const results = getTownRaces(slug)
+  if (results.length === 0) return {}
+
+  const townName = results[0].vcu.vcu
+  const countyName = results[0].vcu.county
+  const canonical = `https://bangordailynews.com/elections/towns/${slug}`
+
+  const contested = results.filter(r => !r.race.uncontested && r.race.candidates.length > 1)
+  const calledRaces = contested.filter(r => r.race.called)
+  const racesWithVotes = contested.filter(r => Object.values(r.vcu.votes).some(v => v > 0))
+
+  const title = `${townName}, Maine Primary Election Results 2026`
+
+  let description: string
+  if (calledRaces.length > 0) {
+    const summaries = calledRaces.map(({ race }) => {
+      const winner = race.candidates.find(c => c.cand_id === race.topline_results.called_candidates[0])
+      return winner ? `${winner.last_name} wins ${race.office}` : null
+    }).filter(Boolean)
+    description = `${townName}, Maine primary results: ${summaries.join('; ')}. Full results from the Bangor Daily News.`
+  } else if (racesWithVotes.length > 0) {
+    const summaries = racesWithVotes.slice(0, 2).map(({ race, vcu }) => {
+      const total = Object.values(vcu.votes).reduce((s, v) => s + v, 0)
+      const sorted = sortCandidates(race.candidates, vcu.votes)
+      const leader = sorted[0]
+      return `${leader.last_name} leads ${race.office}`
+    })
+    description = `Live ${townName}, Maine primary results: ${summaries.join('; ')}. Updated results from the Bangor Daily News.`
+  } else {
+    description = `${townName}, ${countyName} County, Maine primary election results for June 9, 2026. Live coverage by the Bangor Daily News.`
+  }
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { title, description, url: canonical, type: 'website' },
+    twitter: { card: 'summary', title, description },
+  }
+}
+
 export default async function TownPage({ params }: Props) {
   const { slug } = await params
   const results = getTownRaces(slug)
@@ -27,6 +89,12 @@ export default async function TownPage({ params }: Props) {
 
   const townName = results[0].vcu.vcu
   const countyName = results[0].vcu.county
+
+  const byPriority = (a: typeof results[0], b: typeof results[0]) =>
+    officePriority(a.race.office) - officePriority(b.race.office)
+
+  const contested   = results.filter(r => isContested(r.race)).sort(byPriority)
+  const uncontested = results.filter(r => !isContested(r.race)).sort(byPriority)
 
   return (
     <>
@@ -38,7 +106,7 @@ export default async function TownPage({ params }: Props) {
       </nav>
 
       {/* Town header */}
-      <div className="mb-6 border-b border-[#c8c8c8] pb-4">
+      <div style={{ marginBottom: '2rem' }}>
         <h1 className="font-headline text-3xl md:text-4xl tracking-tight">
           {townName}
         </h1>
@@ -47,110 +115,127 @@ export default async function TownPage({ params }: Props) {
         </p>
       </div>
 
-      {/* Race results */}
-      <div className="space-y-6">
-        {results.map(({ race, vcu }) => {
+      {/* Contested race results */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem' }}>
+        {contested.map(({ race, vcu }) => {
           const townTotal = Object.values(vcu.votes).reduce((s, v) => s + v, 0)
+          const hasVotes = townTotal > 0
 
-          const sorted = [...race.candidates].sort(
-            (a, b) => (vcu.votes[String(b.cand_id)] ?? 0) - (vcu.votes[String(a.cand_id)] ?? 0)
-          )
+          const sorted = sortCandidates(race.candidates, vcu.votes)
           const leader = sorted[0]
           const winner = race.topline_results.called_candidates.length > 0
             ? race.candidates.find(c => c.cand_id === race.topline_results.called_candidates[0])
             : null
 
-          const partyColor = race.party === 'Democratic' ? '#1A5FAB' : '#CC2929'
-          const barColor   = race.party === 'Democratic' ? 'bg-[#1A5FAB]' : 'bg-[#CC2929]'
+          const isNonpartisan = race.party !== 'Democratic' && race.party !== 'Republican'
+          const partyColor = race.party === 'Democratic' ? '#1A5FAB' : race.party === 'Republican' ? '#CC2929' : '#555555'
           const raceTitle  = race.district
             ? `${race.office}, District ${race.district}`
             : race.office
-          const partyLabel = race.party === 'Democratic' ? 'Democratic Primary' : 'Republican Primary'
+          const partyLabel = race.party === 'Democratic' ? 'Democratic Primary' : race.party === 'Republican' ? 'Republican Primary' : null
 
           return (
             <div key={race.race_id} className="bg-white rounded-lg border border-[#c8c8c8] overflow-hidden">
 
               {/* Race header */}
-              <div className="px-5 py-3 border-b border-[#c8c8c8] flex items-center justify-between">
-                <div>
-                  <Link
-                    href={`/races/${race.slug}`}
-                    className="font-headline text-lg tracking-tight hover:text-[#2e6b3e]"
-                  >
-                    {raceTitle}
-                  </Link>
+              <div className="px-5 py-3 border-b border-[#c8c8c8] flex items-center gap-3">
+                <Link
+                  href={`/races/${race.slug}`}
+                  className="font-headline text-lg font-bold tracking-tight hover:text-[#2e6b3e] leading-snug"
+                >
+                  {raceTitle}
+                </Link>
+                {partyLabel && (
                   <span
-                    className="ml-2 text-white text-xs px-2 py-0.5 rounded"
+                    className="shrink-0 text-white text-xs font-semibold px-2 py-0.5 rounded-full"
                     style={{ backgroundColor: partyColor }}
                   >
                     {partyLabel}
                   </span>
-                </div>
-                {race.called && winner && (
-                  <span className="text-[#166534] text-xs font-bold">✓ Called: {winner.last_name}</span>
                 )}
               </div>
 
-              {/* Candidates */}
-              <div className="px-5 py-4 space-y-3">
-                {sorted.map(c => {
-                  const v = vcu.votes[String(c.cand_id)] ?? 0
-                  const pct = parseFloat(candidatePct(v, townTotal))
-                  const isLeader = c.cand_id === leader.cand_id
+              {/* Single table: thead + tbody + tfoot so all columns share widths */}
+              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #e8e8e8' }}>
+                    <th style={{ width: 4, padding: 0 }} />
+                    <th style={{ textAlign: 'left', padding: '8px 16px', fontSize: '12px', color: '#767676', fontWeight: 500 }}>Candidate</th>
+                    <th style={{ textAlign: 'right', padding: '8px 16px', fontSize: '12px', color: '#767676', fontWeight: 500 }}>Votes</th>
+                    <th style={{ textAlign: 'right', padding: '8px 16px', fontSize: '12px', color: '#767676', fontWeight: 500, minWidth: '220px' }}>Percentage</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sorted.map((c, i) => {
+                    const v = vcu.votes[String(c.cand_id)] ?? 0
+                    const pct = hasVotes ? parseFloat(candidatePct(v, townTotal)) : 0
+                    const isLeader = i === 0 && hasVotes
+                    const isCalled = race.called && winner?.cand_id === c.cand_id
+                    const isWinnerRow = isCalled
 
-                  return (
-                    <div key={c.cand_id}>
-                      <div className="flex items-baseline justify-between mb-1">
-                        <span className={`text-sm ${isLeader ? 'font-bold' : ''}`}>
-                          {c.first_name} {c.last_name}
-                          {c.incumbent && <span className="text-[#767676] font-normal"> (i)</span>}
-                        </span>
-                        <div className="flex items-baseline gap-3">
-                          <span className={`text-sm font-bold tabular-nums ${isLeader ? '' : 'text-[#767676]'}`}>
-                            {pct.toFixed(1)}%
+                    return (
+                      <tr key={c.cand_id} style={{
+                        borderBottom: '1px solid #f2f2f2',
+                        backgroundColor: isWinnerRow ? (isNonpartisan ? '#f5f5f5' : partyColor) : 'white',
+                      }}>
+                        <td style={{ width: 4, padding: 0, backgroundColor: isWinnerRow ? 'transparent' : partyColor, opacity: isWinnerRow ? 1 : (i === 0 ? 1 : 0.35) }} />
+                        <td style={{ padding: '14px 16px' }}>
+                          <span style={{ fontSize: '15px', fontWeight: isCalled ? 700 : 400, color: isWinnerRow ? '#fff' : '#1a1a1a' }}>
+                            {c.first_name} {c.last_name}
+                            {isCalled && <span style={{ marginLeft: '6px' }}>✓</span>}
                           </span>
-                          <span className="text-xs text-[#767676] tabular-nums w-16 text-right">
-                            {v.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="h-1.5 bg-[#c8c8c8] rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full ${barColor} ${isLeader ? 'opacity-100' : 'opacity-60'}`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-
-              {/* Footer: town vs. statewide leader */}
-              <div className="px-5 py-3 bg-[#f2f2f2] border-t border-[#c8c8c8] text-xs text-[#767676]">
-                <span className="font-medium text-[#1A1A1A]">{townName} leader: {leader.last_name}</span>
-                {' · '}
-                {townTotal.toLocaleString()} votes cast in {townName}
-                {' · '}
-                <Link href={`/races/${race.slug}`} className="text-[#2e6b3e] hover:underline">
-                  See statewide →
-                </Link>
-              </div>
+                          {c.incumbent && (
+                            <span style={{ fontSize: '13px', color: isWinnerRow ? 'rgba(255,255,255,0.7)' : '#767676', marginLeft: '4px' }}>*</span>
+                          )}
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', fontSize: '15px', fontVariantNumeric: 'tabular-nums', color: isWinnerRow ? 'rgba(255,255,255,0.9)' : '#1a1a1a' }}>
+                          {hasVotes ? v.toLocaleString() : '—'}
+                        </td>
+                        <td style={{ padding: '14px 16px', textAlign: 'right', minWidth: '220px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '10px' }}>
+                            <span style={{ fontSize: '15px', fontWeight: 700, minWidth: '52px', textAlign: 'right', color: isWinnerRow ? '#fff' : '#1a1a1a', fontVariantNumeric: 'tabular-nums' }}>
+                              {hasVotes ? `${pct.toFixed(1)}%` : '—'}
+                            </span>
+                            <div style={{ width: '120px', height: '8px', backgroundColor: isWinnerRow ? 'rgba(255,255,255,0.25)' : '#e8e8e8', borderRadius: '4px', overflow: 'hidden', flexShrink: 0 }}>
+                              <div style={{ width: `${pct}%`, height: '100%', backgroundColor: isWinnerRow ? 'rgba(255,255,255,0.85)' : partyColor, borderRadius: '4px', transition: 'width 0.4s ease' }} />
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+                <tfoot style={{ borderTop: '1px solid #c8c8c8', backgroundColor: '#f2f2f2' }}>
+                  <tr>
+                    <td style={{ width: 4, padding: 0 }} />
+                    <td style={{ padding: '10px 16px', fontSize: '12px', color: '#767676' }}>
+                      {hasVotes
+                        ? race.called && winner
+                          ? <><span style={{ fontWeight: 600, color: '#166534' }}>✓ {winner.last_name} wins</span>{' · '}
+                              <Link href={`/races/${race.slug}`} style={{ color: '#2e6b3e' }}>Race results →</Link></>
+                          : <><span style={{ fontWeight: 600, color: '#1a1a1a' }}>{leader.last_name} leads overall</span>{' · '}
+                              <Link href={`/races/${race.slug}`} style={{ color: '#2e6b3e' }}>Race results →</Link></>
+                        : <span>No results yet · <Link href={`/races/${race.slug}`} style={{ color: '#2e6b3e' }}>Race results →</Link></span>
+                      }
+                    </td>
+                    <td style={{ padding: '10px 16px', textAlign: 'right', fontSize: '12px', fontWeight: 600, color: '#1a1a1a', fontVariantNumeric: 'tabular-nums' }}>
+                      {hasVotes ? townTotal.toLocaleString() : '—'}
+                    </td>
+                    <td style={{ padding: '10px 16px' }} />
+                  </tr>
+                </tfoot>
+              </table>
 
             </div>
           )
         })}
       </div>
 
-      {/* Historical context placeholder */}
-      <div className="mt-8 bg-[#f2f2f2] border border-[#c8c8c8] rounded-lg p-5">
-        <h2 className="text-xs font-semibold text-[#767676] mb-3">
-          2018 Context
-        </h2>
-        <p className="text-sm text-[#767676]">
-          2018 primary results and turnout comparison will appear here once the data
-          join to live results is wired up.
-        </p>
+      {/* Uncontested races — collapsible */}
+      <div style={{ marginTop: '2.5rem' }}>
+        <UncontestedToggle rows={uncontested} townName={townName} />
       </div>
+
     </>
   )
 }

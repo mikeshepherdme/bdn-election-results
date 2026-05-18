@@ -157,6 +157,28 @@ export function reportingLabel(race: Race): string {
   return `${p.reporting.toLocaleString()} of ${p.total.toLocaleString()} precincts`
 }
 
+/** Sort candidates by votes desc, except Yes/No referendums which always go Yes → No. */
+export function sortCandidates(
+  candidates: Candidate[],
+  votes: Record<string, number>
+): Candidate[] {
+  const isReferendum = candidates.some(
+    c => c.last_name.toLowerCase() === 'yes' || c.last_name.toLowerCase() === 'no'
+  )
+  if (isReferendum) {
+    return [...candidates].sort((a, b) => {
+      const aName = (a.last_name || a.first_name).toLowerCase()
+      const bName = (b.last_name || b.first_name).toLowerCase()
+      if (aName === 'yes') return -1
+      if (bName === 'yes') return 1
+      return 0
+    })
+  }
+  return [...candidates].sort(
+    (a, b) => (votes[String(b.cand_id)] ?? 0) - (votes[String(a.cand_id)] ?? 0)
+  )
+}
+
 export function candidatePct(votes: number, total: number): string {
   if (total === 0) return '0.0'
   return ((votes / total) * 100).toFixed(1)
@@ -168,6 +190,25 @@ export function leadMargin(race: Race): number | null {
   const sorted = Object.values(votes).sort((a, b) => b - a)
   if (sorted.length < 2) return null
   return ((sorted[0] - sorted[1]) / total_votes) * 100
+}
+
+/**
+ * For legislative, county, DA, and local races: count municipalities (VCUs) total
+ * and how many have reported votes. Returns null for statewide/federal races.
+ */
+export function municipalitiesReporting(race: Race): { reporting: number; total: number } | null {
+  if (race.level === 'Federal' || race.level === 'Federal/District' || race.level === 'Statewide') return null
+  const vcus = flatVcus(race)
+  if (vcus.length === 0) return null
+  const reporting = vcus.filter(v =>
+    v.precincts.reporting > 0 || Object.values(v.votes).some(n => n > 0)
+  ).length
+  return { reporting, total: vcus.length }
+}
+
+/** True for state/federal races with 3+ candidates — Maine uses RCV for these */
+export function isRCV(race: Race): boolean {
+  return race.level !== 'Universal' && race.candidates.length >= 3
 }
 
 /** Flatten counties → vcus, attaching county name to each VCU */
