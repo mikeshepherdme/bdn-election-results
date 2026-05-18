@@ -178,6 +178,10 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
             <th className={`text-left px-4 ${full ? 'py-2.5' : 'py-1.5'} text-xs text-[#767676] font-medium`}>
               {label ?? 'Candidates'}
             </th>
+            {race.election_type_id === 9 && (
+              <th className={`${full ? 'py-2.5' : 'py-1.5'} text-xs text-[#767676] font-medium`}
+                  style={{ paddingLeft: '8px', paddingRight: '8px', textAlign: 'left' }}>Party</th>
+            )}
             <th className={`${full ? 'py-2.5' : 'py-1.5'} text-xs text-[#767676] font-medium`}
                 style={{ paddingLeft: full ? '24px' : '16px', paddingRight: full ? '24px' : '16px', textAlign: 'left' }}>Percentage</th>
             <th className={`${full ? 'py-2.5' : 'py-1.5'} text-xs text-[#767676] font-medium`}
@@ -254,13 +258,6 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
                         {c.incumbent && (
                           <span className="font-normal text-sm ml-0.5" style={{ color: subTextColor }}> *</span>
                         )}
-                        {race.election_type_id === 9 && c.party_name && (
-                          <span className="text-xs font-bold ml-1.5" style={{
-                            color: c.party_name === 'Democratic' ? '#1A5FAB' : c.party_name === 'Republican' ? '#CC2929' : '#444444',
-                          }}>
-                            {c.party_name === 'Democratic' ? 'Dem.' : c.party_name === 'Republican' ? 'Rep.' : c.party_name}
-                          </span>
-                        )}
                       </span>
                       {isCalled && callTime && (
                         <span
@@ -273,6 +270,18 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
                     </div>
                   </div>
                 </td>
+
+                {/* Party — special elections only */}
+                {race.election_type_id === 9 && (
+                  <td className={`${full ? 'py-3' : hasPhotos ? 'py-1.5' : 'py-2'}`}
+                      style={{ paddingLeft: '8px', paddingRight: '8px', whiteSpace: 'nowrap' }}>
+                    <span className="text-xs font-bold" style={{
+                      color: c.party_name === 'Democratic' ? '#1A5FAB' : c.party_name === 'Republican' ? '#CC2929' : '#444444',
+                    }}>
+                      {c.party_name === 'Democratic' ? 'Dem.' : c.party_name === 'Republican' ? 'Rep.' : c.party_name}
+                    </span>
+                  </td>
+                )}
 
                 {/* Pct */}
                 <td className={`${full ? 'py-3' : hasPhotos ? 'py-1.5' : 'py-2'} ${full ? '' : 'text-right'}`}
@@ -302,6 +311,7 @@ export default function RaceTable({ race, vcuVotes, vcuTotal, compact, label, bo
           <tr className="border-t border-[#c8c8c8] bg-[#f2f2f2]">
             {full && <td style={{ width: '8px', padding: 0 }} />}
             <td className={`px-4 ${full ? 'py-2' : 'py-1.5'} text-[#767676] font-medium text-sm`}>Total</td>
+            {race.election_type_id === 9 && <td />}
             <td className={`px-4 ${full ? 'py-2' : 'py-1.5'}`} />
             <td className={`${full ? 'py-2' : 'py-1.5'} text-right tabular-nums text-[#767676] font-medium text-sm`}
                 style={{ paddingLeft: '16px', paddingRight: '24px' }}>
