@@ -48,6 +48,11 @@ const PHOTO_POSITION_MAP: Record<number, string> = {
   950893: '50% 20%',  // Hannah Pingree — background above head, face sits low
   950900: '50% 10%',  // Charles — trees/background above face
   950884: '50% 25%',  // Platner — cap at top, face in middle third
+  950905: '50% 30%',  // Midgley — close crop, chin cut at top anchor
+  950882: '50% 30%',  // Costello — close crop, chin cut at top anchor
+  950889: '50% 25%',  // Wood — face fills frame, chin cut
+  950896: '50% 25%',  // Pietrowicz — chin cut at top anchor
+  950897: '50% 25%',  // Russell — chin cut at top anchor
 }
 
 export function candidatePhoto(candId: number): string | null {
