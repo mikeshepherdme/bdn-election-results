@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import RaceCard from '@/components/RaceCard'
+import ElectionTopper from '@/components/ElectionTopper'
+import LiveTicker from '@/components/LiveTicker'
 import { getRaces } from '@/lib/mock-data'
 import type { Race } from '@/lib/types'
 
@@ -97,6 +99,20 @@ export default function HomePage() {
 
   return (
     <>
+      <div className="space-y-6" style={{ paddingTop: '1rem' }}>
+
+        {/* ── Topper + Live ticker ─────────────────────────────────────────── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
+          <div className="lg:col-span-2">
+            <ElectionTopper />
+          </div>
+          <div>
+            <LiveTicker maxHeight="240px" />
+          </div>
+        </div>
+
+      </div>
+
       <div className="space-y-10" style={{ paddingTop: '2rem' }}>
 
         {/* ── Statewide & Federal ──────────────────────────────────────────── */}
