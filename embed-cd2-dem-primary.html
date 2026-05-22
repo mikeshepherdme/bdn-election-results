@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>U.S. House, District 2 – Democratic Primary | BDN Election Results</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+      font-size: 14px;
+      color: #1a1a1a;
+      background: #fff;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .embed-wrap { max-width: 920px; margin: 0 auto; padding: 0 0 4px; }
+
+    /* ── Race header (full width) ─────────────────────────────────────────── */
+    .race-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0 10px;
+      flex-wrap: wrap;
+    }
+    .race-title { font-size: 20px; font-weight: 700; line-height: 1.2; }
+    .party-pill {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.05em; padding: 3px 9px; border-radius: 100px;
+      background: #E8F0FA; color: #1A5FAB; margin-top: 5px;
+    }
+    .hdr-status {
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    /* ── Two-column layout ───────────────────────────────────────────────── */
+    .main-layout {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .left-panel {
+      flex: 3;
+      min-width: 0;
+    }
+    .map-col {
+      flex: 2;
+      min-width: 0;
+      position: sticky;
+      top: 8px;
+      align-self: flex-start;
+    }
+
+    /* ── Card (left panel) ───────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 1px solid #c8c8c8;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    /* ── View toggle link ────────────────────────────────────────────────── */
+    .toggle-link {
+      background: none; border: 1.5px solid #2e6b3e; padding: 3px 10px;
+      border-radius: 100px; cursor: pointer; font-size: 12px; font-weight: 600;
+      color: #2e6b3e; font-family: inherit; white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .toggle-link:hover { background: #2e6b3e; color: #fff; }
+
+    /* ── Status bar ──────────────────────────────────────────────────────── */
+    .status-bar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; padding: 5px 14px;
+      background: #f2f2f2; border-bottom: 1px solid #c8c8c8;
+    }
+    .status-logos { display: flex; align-items: center; gap: 6px; }
+    .status-logos img { display: block; }
+    .status-right { display: flex; align-items: center; gap: 8px; }
+    .status-track {
+      width: 68px; height: 5px; background: #c8c8c8;
+      border-radius: 100px; overflow: hidden; flex-shrink: 0;
+    }
+    .status-fill  { height: 100%; border-radius: 100px; background: #1A5FAB; transition: width 0.4s ease; }
+    .status-pct   { font-size: 15px; font-weight: 700; color: #1a1a1a; white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .status-label { font-size: 11px; font-weight: 400; color: #767676; white-space: nowrap; }
+    .status-updated { font-size: 11px; color: #767676; white-space: nowrap; }
+
+    /* ── Called banner ───────────────────────────────────────────────────── */
+    .called-banner {
+      padding: 5px 14px; background: #166534; color: #fff;
+      font-size: 12px; font-weight: 700; text-align: center;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Candidate table ─────────────────────────────────────────────────── */
+    .cand-table { width: 100%; border-collapse: collapse; }
+    .cand-table thead tr { border-bottom: 1px solid #c8c8c8; }
+    .cand-table thead th {
+      padding: 8px 0; font-size: 11px; font-weight: 500;
+      color: #767676; text-align: left;
+    }
+    .th-strip { width: 10px; }
+    .th-name  { padding-left: 14px; }
+    .th-pct   { padding-left: 20px; padding-right: 20px; min-width: 150px; }
+    .th-votes { text-align: right; padding-right: 16px; min-width: 60px; }
+    .cand-table tbody tr { border-bottom: 1px solid #f2f2f2; }
+    .cand-table tbody tr:last-child { border-bottom: none; }
+    .cand-table tfoot tr { border-top: 1px solid #c8c8c8; background: #f2f2f2; }
+    .td-strip  { width: 10px; padding: 0; }
+    .td-name   { padding: 10px 14px; }
+    .cand-name { font-size: 15px; font-weight: 400; color: #1a1a1a; }
+    .cand-name.winner { font-weight: 700; }
+    .cand-check     { font-weight: 700; font-size: 13px; margin-left: 5px; }
+    .cand-call-time { display: block; font-size: 11px; color: #767676; margin-top: 2px; }
+    .td-pct  { padding: 10px 20px; }
+    .pct-wrap { display: flex; align-items: center; gap: 12px; }
+    .pct-num {
+      font-size: 14px; font-weight: 700; min-width: 44px; text-align: right;
+      color: #1a1a1a; font-variant-numeric: tabular-nums; flex-shrink: 0;
+    }
+    .bar-track { flex: 1; height: 6px; background: #e8e8e8; border-radius: 100px; overflow: hidden; min-width: 20px; }
+    .bar-fill  { height: 100%; border-radius: 100px; transition: width 0.4s ease; }
+    .td-votes  {
+      text-align: right; padding-right: 16px; font-size: 14px; font-weight: 500;
+      color: #1a1a1a; white-space: nowrap; font-variant-numeric: tabular-nums;
+    }
+    .td-foot-label { padding: 6px 14px; font-size: 12px; font-weight: 500; color: #767676; }
+    .td-foot-total {
+      text-align: right; padding-right: 16px; font-size: 12px; font-weight: 500;
+      color: #767676; font-variant-numeric: tabular-nums;
+    }
+    .no-results { color: #1a1a1a; font-weight: 700; }
+    .row-called { background: #eff6ff; }
+
+    /* ── Local view: town table ──────────────────────────────────────────── */
+    .town-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 9px 14px; border-bottom: 1px solid #c8c8c8;
+      flex-wrap: wrap;
+    }
+    .town-hdr-title { font-size: 12px; font-weight: 600; color: #444; }
+    .town-search {
+      border: 1px solid #c8c8c8; border-radius: 5px;
+      padding: 4px 10px; font-size: 12px; color: #1a1a1a;
+      outline: none; width: 160px; font-family: inherit;
+    }
+    .town-search:focus { border-color: #2e6b3e; }
+    .town-scroll { overflow-x: auto; overflow-y: auto; max-height: 370px; }
+    .town-table  { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .town-table thead { background: #f2f2f2; position: sticky; top: 0; z-index: 1; }
+    .town-table thead tr { border-bottom: 1px solid #c8c8c8; }
+    .town-table thead th {
+      padding: 7px 10px; font-size: 11px; font-weight: 500; color: #767676;
+      cursor: pointer; user-select: none; white-space: nowrap;
+    }
+    .town-table thead th:hover { color: #444; }
+    .town-table thead th.th-town  { text-align: left; padding-left: 14px; }
+    .town-table thead th.th-cand  { text-align: right; }
+    .town-table thead th.th-total { text-align: right; padding-right: 14px; }
+    .color-dot { display: inline-block; width: 7px; height: 7px; border-radius: 2px; margin-right: 3px; vertical-align: middle; }
+    .sort-arrow { margin-left: 2px; }
+    .sort-arrow.dim { color: #c8c8c8; }
+    .town-table tbody tr { border-bottom: 1px solid #f2f2f2; }
+    .town-table tbody tr:last-child { border-bottom: none; }
+    .town-table tbody tr:hover { background: #f9f9f9; }
+    .town-table tbody td { padding: 6px 10px; color: #767676; }
+    .td-town  { padding-left: 14px !important; font-weight: 500; color: #1a1a1a !important; white-space: nowrap; }
+    .td-cand  { text-align: right; font-variant-numeric: tabular-nums; }
+    .td-cand.sorted { background: #f2f2f2; }
+    .td-total { text-align: right; padding-right: 14px !important; font-variant-numeric: tabular-nums; font-size: 11px; }
+    .pct-leader { font-weight: 700; }
+    .pct-dim    { color: #c8c8c8; }
+    .town-empty { padding: 20px; text-align: center; color: #767676; font-size: 12px; }
+    .town-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 6px 14px; border-top: 1px solid #f2f2f2;
+      font-size: 11px; color: #767676; flex-wrap: wrap; gap: 4px;
+    }
+    .pagination { display: flex; align-items: center; gap: 3px; }
+    .page-btn {
+      padding: 2px 8px; border: 1px solid #c8c8c8; border-radius: 4px;
+      background: none; cursor: pointer; font-size: 12px; color: #767676;
+      font-family: inherit; line-height: 1.4;
+    }
+    .page-btn:hover:not(:disabled) { border-color: #2e6b3e; color: #2e6b3e; }
+    .page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .page-label { font-size: 11px; color: #767676; padding: 0 4px; }
+
+    /* ── Map column (right, always visible) ──────────────────────────────── */
+    .map-wrap { position: relative; }
+    .map-loading {
+      height: 260px; display: flex; align-items: center;
+      justify-content: center; font-size: 12px; color: #767676;
+    }
+    #map-svg { display: block; width: 100%; height: auto; }
+    .zoom-btns {
+      position: absolute; bottom: 8px; right: 8px;
+      display: flex; flex-direction: column; gap: 3px; z-index: 5;
+    }
+    .zoom-btn {
+      width: 28px; height: 28px; background: #fff; border: 1px solid #c8c8c8;
+      border-radius: 4px; font-size: 18px; font-weight: 700; line-height: 1;
+      cursor: pointer; color: #444; display: flex; align-items: center;
+      justify-content: center; font-family: inherit;
+    }
+    .zoom-btn:hover:not(:disabled) { border-color: #999; }
+    .zoom-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .map-tooltip {
+      position: absolute; pointer-events: none;
+      background: rgba(17,17,17,0.92); color: #fff;
+      border-radius: 4px; padding: 6px 9px;
+      font-size: 11px; line-height: 1.6; z-index: 10; white-space: nowrap;
+    }
+    .tt-name { font-weight: 700; margin-bottom: 2px; }
+    .tt-row  { display: flex; align-items: center; gap: 5px; min-width: 120px; }
+    .tt-dot  { display: inline-block; width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .tt-pct  { margin-left: auto; padding-left: 8px; font-variant-numeric: tabular-nums; }
+    .tt-na   { color: #aaa; }
+    .map-legend { display: flex; flex-wrap: wrap; gap: 5px 12px; margin-top: 8px; }
+    .legend-item { display: flex; align-items: center; gap: 4px; }
+    .legend-dot  { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .legend-lbl  { font-size: 11px; color: #444; }
+
+    /* ── RCV badge ───────────────────────────────────────────────────────── */
+    .rcv-badge {
+      font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px;
+      background: #d6ead9; color: #2e6b3e; white-space: nowrap;
+    }
+    .rcv-icon { font-size: 12px; cursor: help; user-select: none; }
+
+    /* ── Live updates ticker ─────────────────────────────────────────────── */
+    .ticker-card { border:1px solid #c8c8c8; border-radius:8px; overflow:hidden; background:#fff; }
+    .ticker-hdr  { display:flex; align-items:center; justify-content:space-between; padding:8px 14px; background:#f2f2f2; border-bottom:1px solid #c8c8c8; }
+    .ticker-title{ font-size:13px; font-weight:600; color:#444; display:flex; align-items:center; gap:7px; }
+    .ticker-pulse{ width:8px; height:8px; border-radius:50%; background:#cc2929; animation:tkpulse 1.4s ease-in-out infinite; }
+    @keyframes tkpulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .ticker-cancel{ font-size:12px; color:#2e6b3e; background:none; border:none; cursor:pointer; font-family:inherit; text-decoration:underline; }
+    .ticker-feed { overflow-y:auto; max-height:320px; }
+    .ticker-empty{ padding:12px 16px; font-size:13px; color:#767676; }
+    .ticker-evt  { display:flex; align-items:flex-start; gap:10px; padding:10px 16px; border-bottom:1px solid #f2f2f2; transition:background 0.3s; }
+    .ticker-evt:last-child { border-bottom:none; }
+    .ticker-time { font-size:11px; color:#767676; white-space:nowrap; padding-top:2px; min-width:52px; font-variant-numeric:tabular-nums; flex-shrink:0; }
+    .ticker-badge{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:0.05em; padding:2px 6px; border-radius:3px; white-space:nowrap; flex-shrink:0; margin-top:1px; }
+    .ticker-body { flex:1; min-width:0; font-size:13px; color:#1a1a1a; line-height:1.45; }
+    .ticker-author{ font-size:11px; color:#767676; white-space:nowrap; padding-top:2px; flex-shrink:0; }
+    .ticker-del  { font-size:11px; color:#c8c8c8; background:none; border:none; cursor:pointer; flex-shrink:0; padding-top:2px; font-family:inherit; }
+    .ticker-del:hover { color:#cc2929; }
+    .story-card  { display:flex; gap:10px; margin-top:6px; border:1px solid #e0e0e0; border-radius:6px; overflow:hidden; text-decoration:none; background:#fff; }
+    .story-card:hover { border-color:#2e6b3e; }
+    .story-img   { width:56px; flex-shrink:0; object-fit:cover; }
+    .story-meta  { padding:8px 10px; display:flex; flex-direction:column; justify-content:center; min-width:0; }
+    .story-ttl   { font-size:12px; font-weight:700; color:#1a1a1a; line-height:1.3; margin:0; }
+    .story-src   { font-size:11px; color:#2e6b3e; font-weight:600; margin:3px 0 0; }
+    .ticker-form-wrap { padding:10px 14px; border-bottom:1px solid #c8c8c8; background:#f9f9f9; }
+    .ticker-inp  { display:block; width:100%; border:1px solid #c8c8c8; border-radius:5px; padding:6px 10px; font-size:12px; font-family:inherit; color:#1a1a1a; outline:none; margin-bottom:6px; box-sizing:border-box; }
+    .ticker-inp:focus { border-color:#2e6b3e; }
+    .ticker-inp.err { border-color:#cc2929; }
+    .ticker-ta   { resize:vertical; min-height:52px; }
+    .ticker-row  { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+    .ticker-post { padding:5px 14px; background:#2e6b3e; color:#fff; border:none; border-radius:4px; font-size:12px; font-weight:600; cursor:pointer; font-family:inherit; }
+    .ticker-post:disabled { opacity:0.5; cursor:not-allowed; }
+    .ticker-post:hover:not(:disabled) { background:#1e4d2c; }
+    .last-upd { font-size:11px; color:#767676; margin-top:5px; text-align:right; }
+
+    /* ── Attribution ─────────────────────────────────────────────────────── */
+    .embed-footer { font-size: 11px; color: #bbb; text-align: right; padding: 6px 0 0; }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 560px) {
+      .main-layout { flex-direction: column; }
+      .map-col { position: static; width: 100%; margin-top: 12px; }
+      .race-title { font-size: 17px; }
+    }
+  </style>
+</head>
+<body>
+<div class="embed-wrap">
+
+  <div class="main-layout">
+
+    <!-- Left: header + card -->
+    <div class="left-panel">
+      <div class="race-header">
+        <div id="hdr-left"></div>
+        <div id="hdr-right" class="hdr-status"></div>
+      </div>
+      <div class="card">
+        <div id="called-banner" style="display:none"></div>
+        <!-- Statewide: candidate table -->
+        <div id="statewide-view"></div>
+        <!-- Local: town-by-town table -->
+        <div id="local-view" style="display:none">
+          <div class="town-hdr">
+            <button class="toggle-link" onclick="switchView('statewide')">&#x2190;&nbsp;Statewide</button>
+            <input class="town-search" id="town-search" type="text"
+              placeholder="Filter towns&hellip;" oninput="onSearch(this.value)">
+          </div>
+          <div class="town-scroll">
+            <table class="town-table" id="town-table"></table>
+          </div>
+          <div class="town-footer" id="town-footer"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: map (always visible) -->
+    <div class="map-col">
+      <div class="map-wrap" id="map-wrap">
+        <div id="map-container"><div class="map-loading">Loading map&hellip;</div></div>
+        <div class="zoom-btns">
+          <button class="zoom-btn" id="zoom-in"  onclick="handleZoom(1)"  title="Zoom in">+</button>
+          <button class="zoom-btn" id="zoom-out" onclick="handleZoom(-1)" title="Zoom out">&minus;</button>
+        </div>
+        <div class="map-tooltip" id="map-tooltip" style="display:none"></div>
+      </div>
+    </div>
+
+  </div><!-- /.main-layout -->
+
+  <div id="last-upd" class="last-upd"></div>
+  <div id="ticker-wrap" style="margin-top:12px;display:none"></div>
+
+  <div class="embed-footer">Results by Decision Desk HQ &middot; Bangor Daily News</div>
+</div>
+
+<script>
+// ── Config ────────────────────────────────────────────────────────────────────
+var DATA_URL = null;          // set to race API endpoint: us-house-d2-democratic-primary
+var GEO_BASE = 'public/geo'; // path to maine-results.geojson & maine-unorganized.geojson
+var POLL_MS  = 30000;
+var PAGE_SIZE = 20;
+
+// ── Mock data ─────────────────────────────────────────────────────────────────
+var MOCK_RACE = {
+  office: 'U.S. House, District 2',
+  party: 'Democratic',
+  called: false,
+  reporting_type: 'estimated',
+  last_updated: '2026-06-09T21:14:00-04:00',
+  municipalities: { reporting: 12, total: 90 },
+  candidates: [
+    { cand_id: 950886, first_name: 'Joseph',  last_name: 'Baldacci', incumbent: false },
+    { cand_id: 950887, first_name: 'Matthew', last_name: 'Dunlap',   incumbent: false },
+    { cand_id: 950889, first_name: 'Jordan',  last_name: 'Wood',     incumbent: false },
+    { cand_id: 950888, first_name: 'Paige',   last_name: 'Loud',     incumbent: false }
+  ],
+  topline_results: {
+    total_votes: 12000,
+    votes: { '950886': 4800, '950887': 3600, '950889': 2400, '950888': 1200 },
+    estimated_votes: { estimated_votes_mid: 50000 },
+    precincts: { total: 90, reporting: 12, percent: null },
+    called_candidates: [],
+    call_times: []
+  },
+  towns: [
+    { name: 'Bangor',       county: 'Penobscot',  votes: { '950886': 820,  '950887': 610, '950889': 410, '950888': 200 } },
+    { name: 'Brewer',       county: 'Penobscot',  votes: { '950886': 520,  '950887': 390, '950889': 260, '950888': 130 } },
+    { name: 'Orono',        county: 'Penobscot',  votes: { '950886': 380,  '950887': 285, '950889': 190, '950888': 95  } },
+    { name: 'Old Town',     county: 'Penobscot',  votes: { '950886': 340,  '950887': 255, '950889': 170, '950888': 85  } },
+    { name: 'Presque Isle', county: 'Aroostook',  votes: { '950886': 490,  '950887': 370, '950889': 245, '950888': 122 } },
+    { name: 'Caribou',      county: 'Aroostook',  votes: { '950886': 410,  '950887': 308, '950889': 205, '950888': 102 } },
+    { name: 'Houlton',      county: 'Aroostook',  votes: { '950886': 280,  '950887': 210, '950889': 140, '950888': 70  } },
+    { name: 'Farmington',   county: 'Franklin',   votes: { '950886': 310,  '950887': 232, '950889': 155, '950888': 77  } },
+    { name: 'Skowhegan',    county: 'Somerset',   votes: { '950886': 290,  '950887': 218, '950889': 145, '950888': 72  } },
+    { name: 'Waterville',   county: 'Kennebec',   votes: { '950886': 420,  '950887': 315, '950889': 210, '950888': 105 } },
+    { name: 'Augusta',      county: 'Kennebec',   votes: { '950886': 380,  '950887': 285, '950889': 190, '950888': 95  } },
+    { name: 'Ellsworth',    county: 'Hancock',    votes: { '950886': 160,  '950887': 118, '950889': 80,  '950888': 47  } }
+  ]
+};
+
+// ── Estimated votes disclaimer ────────────────────────────────────────────────
+var ESTIMATED_VOTES_DISCLAIMER = "Estimated votes represents Decision Desk HQ's predicted estimate for the amount of votes that have been reported by local clerks. It will change as votes come in.";
+
+function showEvTip() {
+  var icon = document.getElementById('ev-icon');
+  if (!icon) return;
+  var r = icon.getBoundingClientRect();
+  var tipW = 280;
+  var below = (window.innerHeight - r.bottom) >= 120 || (window.innerHeight - r.bottom) >= r.top;
+  var left = Math.max(8, Math.min(r.left, window.innerWidth - tipW - 8));
+  var tip = document.getElementById('ev-tooltip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'ev-tooltip'; document.body.appendChild(tip); }
+  tip.textContent = ESTIMATED_VOTES_DISCLAIMER;
+  tip.style.cssText = 'position:fixed;width:'+tipW+'px;background:#1a1a1a;color:#fff;' +
+    'padding:10px 12px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.25);' +
+    'font-size:13px;line-height:1.5;z-index:9999;display:block;left:'+left+'px;' +
+    (below ? 'top:'+(r.bottom+6)+'px;bottom:auto' : 'bottom:'+(window.innerHeight-r.top+6)+'px;top:auto');
+}
+function hideEvTip() { var t = document.getElementById('ev-tooltip'); if (t) t.style.display = 'none'; }
+
+// ── RCV ───────────────────────────────────────────────────────────────────────
+var RCV_DISCLAIMER = 'This race is being decided by ranked-choice voting. Clerks only report first-round choices on election night. If no candidate wins an outright majority, the race will be decided by examining voters' second choices. That count is likely to happen the week after Election Day. We will not call a race until it is clear a candidate will win a majority.';
+
+function isRCV(r) { return r.candidates.length >= 3; }
+
+function showRCVTip() {
+  var icon = document.getElementById('rcv-icon');
+  if (!icon) return;
+  var r = icon.getBoundingClientRect();
+  var tipW = 300;
+  var below = (window.innerHeight - r.bottom) >= 160 || (window.innerHeight - r.bottom) >= r.top;
+  var left = Math.max(8, Math.min(r.left, window.innerWidth - tipW - 8));
+  var tip = document.getElementById('rcv-tooltip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'rcv-tooltip'; document.body.appendChild(tip); }
+  tip.textContent = RCV_DISCLAIMER;
+  tip.style.cssText = 'position:fixed;width:'+tipW+'px;background:#1a1a1a;color:#fff;' +
+    'padding:10px 12px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.25);' +
+    'font-size:13px;line-height:1.5;z-index:9999;display:block;left:'+left+'px;' +
+    (below ? 'top:'+(r.bottom+6)+'px;bottom:auto' : 'bottom:'+(window.innerHeight-r.top+6)+'px;top:auto');
+}
+function hideRCVTip() { var t=document.getElementById('rcv-tooltip'); if(t) t.style.display='none'; }
+
+// ── Colors ────────────────────────────────────────────────────────────────────
+var PARTY_COLORS = ['#1A5FAB','#2980B9','#1ABC9C','#2C3E6B','#5B8FD4','#8EC6E6'];
+var OTHER_COLOR  = '#aaaaaa';
+
+var PHOTO_MAP = {
+  950886: 'public/candidate-photos/Baldacci.jpg',
+  950887: 'public/candidate-photos/Dunlap.JPG',
+  950888: 'public/candidate-photos/Loud.PNG',
+  950889: 'public/candidate-photos/Wood.JPG'
+};
+var PHOTO_POS_MAP = { 950889: '50% 25%' };
+
+// ── Map projection (matches MaineMap.tsx exactly) ─────────────────────────────
+var MAP_MIN_LNG = -71.65, MAP_MAX_LNG = -66.75;
+var MAP_MIN_LAT = 42.90,  MAP_MAX_LAT = 47.56;
+var MAP_H = 500;
+function _my(lat) { var r = lat*Math.PI/180; return Math.log(Math.tan(Math.PI/4+r/2)); }
+var _myMin = _my(MAP_MIN_LAT), _mySpan = _my(MAP_MAX_LAT) - _my(MAP_MIN_LAT);
+var _lngRd = (MAP_MAX_LNG - MAP_MIN_LNG) * Math.PI / 180;
+var MAP_W  = Math.round(_lngRd / _mySpan * MAP_H);
+
+function projectPt(lng, lat) {
+  return [
+    (lng - MAP_MIN_LNG) * Math.PI / 180 / _mySpan * MAP_H,
+    (1 - (_my(lat) - _myMin) / _mySpan) * MAP_H
+  ];
+}
+function featureToPath(feat) {
+  var geom = feat && feat.geometry; if (!geom) return '';
+  var rings;
+  if      (geom.type === 'Polygon')      { rings = geom.coordinates; }
+  else if (geom.type === 'MultiPolygon') {
+    rings = [];
+    for (var p=0;p<geom.coordinates.length;p++)
+      for (var q=0;q<geom.coordinates[p].length;q++) rings.push(geom.coordinates[p][q]);
+  } else { return ''; }
+  var parts = [];
+  for (var r=0;r<rings.length;r++) {
+    var ring=rings[r], d='';
+    for (var i=0;i<ring.length;i++) {
+      var xy=projectPt(ring[i][0],ring[i][1]);
+      d += (i===0?'M':'L')+xy[0].toFixed(1)+','+xy[1].toFixed(1)+' ';
+    }
+    parts.push(d+'Z');
+  }
+  return parts.join(' ');
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+var race       = MOCK_RACE;
+var activeView = 'statewide';
+var sortKey    = 'total', sortDir = 'desc';
+var townPage   = 1, townSearch = '';
+var mapSvgEl   = null, mapGEl = null;
+var resultsGeo = null, unorganizedGeo = null;
+var mapTownResults = {};
+var mapZoom = 1, mapPanX = 0, mapPanY = 0;
+var isDragging = false, dragStart = null, tooltipTown = null;
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function fmt(n) { return n.toLocaleString(); }
+function pctStr(v,t) { return t>0?(v/t*100).toFixed(1):'0.0'; }
+function fmtTime(iso) {
+  return new Date(iso).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/New_York'})
+    .replace(' AM',' a.m.').replace(' PM',' p.m.')+' ET';
+}
+function dispName(c) { return c.first_name+' '+c.last_name+(c.suffix?' '+c.suffix:''); }
+function sumVotes(v) { var t=0,ks=Object.keys(v); for(var i=0;i<ks.length;i++) t+=v[ks[i]]||0; return t; }
+function sortedCands(cands, votes) {
+  return cands.slice().sort(function(a,b){ return (votes[String(b.cand_id)]||0)-(votes[String(a.cand_id)]||0); });
+}
+function buildColorMap(cands, votes, total) {
+  var map={};
+  if (cands.length>=5 && total>0) {
+    var s=cands.slice().sort(function(a,b){return (votes[String(b.cand_id)]||0)-(votes[String(a.cand_id)]||0);});
+    var idx=0;
+    for (var i=0;i<s.length;i++) {
+      map[s[i].cand_id]=((votes[String(s[i].cand_id)]||0)/total*100)>10?PARTY_COLORS[idx++]:OTHER_COLOR;
+    }
+    return map;
+  }
+  for (var j=0;j<cands.length;j++) map[cands[j].cand_id]=PARTY_COLORS[j%PARTY_COLORS.length];
+  return map;
+}
+function flattenTowns(r) {
+  if (r.towns) return r.towns;
+  if (!r.counties) return [];
+  var out=[];
+  for (var i=0;i<r.counties.length;i++) {
+    var co=r.counties[i];
+    for (var j=0;j<co.vcus.length;j++) out.push({name:co.vcus[j].vcu,county:co.county,votes:co.vcus[j].votes});
+  }
+  return out;
+}
+function reportingTowns(r) {
+  return flattenTowns(r).filter(function(t){
+    var ks=Object.keys(t.votes); for(var i=0;i<ks.length;i++) if(t.votes[ks[i]]>0) return true; return false;
+  });
+}
+function getMuniCount(r) {
+  if (r.municipalities) return r.municipalities;
+  var all=flattenTowns(r);
+  var rep=all.filter(function(t){var ks=Object.keys(t.votes);for(var i=0;i<ks.length;i++) if(t.votes[ks[i]]>0)return true;return false;}).length;
+  return {reporting:rep,total:all.length};
+}
+
+// ── Render: header ────────────────────────────────────────────────────────────
+function renderHeader() {
+  var rcvHtml = isRCV(race)
+    ? '<div style="margin-top:4px">' +
+        '<span class="rcv-badge">Ranked-Choice Voting</span>' +
+        '<span class="rcv-icon" id="rcv-icon" tabindex="0" role="note" aria-label="About ranked-choice voting">&#x1F4DD;</span>' +
+      '</div>'
+    : '';
+  document.getElementById('hdr-left').innerHTML =
+    '<div class="race-title">'+race.office+'</div>' +
+    '<div style="margin-top:5px"><span class="party-pill">Democratic Primary</span></div>' +
+    rcvHtml;
+  var icon = document.getElementById('rcv-icon');
+  if (icon) {
+    icon.addEventListener('mouseenter', showRCVTip);
+    icon.addEventListener('mouseleave', hideRCVTip);
+    icon.addEventListener('focus',      showRCVTip);
+    icon.addEventListener('blur',       hideRCVTip);
+  }
+}
+
+// ── Render: header status (right side) + called banner ───────────────────────
+function renderStatusBar() {
+  var top=race.topline_results, total=top.total_votes;
+  var estimated=(top.estimated_votes&&top.estimated_votes.estimated_votes_mid)||0;
+  var fill=estimated>0?Math.min(100,Math.round(total/estimated*100)):0;
+
+  var logos='<div class="status-logos">' +
+    '<img src="public/ddhq-logo.png" alt="DDHQ" style="height:14px;width:auto;opacity:0.75">' +
+    '<img src="public/bdn-logo.webp" alt="BDN" style="height:14px;width:auto">' +
+    '</div>';
+
+  var isEst = race.reporting_type === 'estimated';
+  var evNote = isEst
+    ? ' <span id="ev-icon" class="rcv-icon" tabindex="0" role="note" aria-label="'+ESTIMATED_VOTES_DISCLAIMER+'">&#x1F4DD;</span>'
+    : '';
+  var label = isEst
+    ? '<span class="status-label">'+fmt(total)+' of est. '+fmt(estimated)+' votes'+evNote+'</span>'
+    : '<span class="status-label">'+fmt(total)+' of '+fmt(estimated)+' votes</span>';
+
+  var barHtml = total>0
+    ? '<span class="status-pct">'+fill+'%</span>' +
+      '<div class="status-track"><div class="status-fill" style="width:'+fill+'%"></div></div>' +
+      label
+    : '<span class="status-updated">Updated '+fmtTime(race.last_updated)+'</span>';
+  document.getElementById('hdr-right').innerHTML = logos + barHtml;
+
+  if (isEst) {
+    var evIcon = document.getElementById('ev-icon');
+    if (evIcon) {
+      evIcon.addEventListener('mouseenter', showEvTip);
+      evIcon.addEventListener('mouseleave', hideEvTip);
+      evIcon.addEventListener('focus',      showEvTip);
+      evIcon.addEventListener('blur',       hideEvTip);
+    }
+  }
+
+  var calledId=top.called_candidates&&top.called_candidates[0];
+  var banEl=document.getElementById('called-banner');
+  if (race.called&&calledId) {
+    for (var i=0;i<race.candidates.length;i++) {
+      if (race.candidates[i].cand_id===calledId) {
+        banEl.className='called-banner'; banEl.style.display='';
+        banEl.innerHTML='&#x2713; '+dispName(race.candidates[i])+' wins the Democratic primary';
+        break;
+      }
+    }
+  } else { banEl.style.display='none'; }
+}
+
+// ── Render: statewide candidate table ─────────────────────────────────────────
+function renderStatewideTable() {
+  var top=race.topline_results, votes=top.votes, total=top.total_votes;
+  var hasRes=total>0;
+  var colorMap=buildColorMap(race.candidates,votes,total);
+  var sorted=sortedCands(race.candidates,votes);
+  var calledId=top.called_candidates&&top.called_candidates[0];
+  var callT0=top.call_times&&top.call_times[0];
+  var hasPhotos=sorted.some(function(c){return !!PHOTO_MAP[c.cand_id];});
+
+  var html='<table class="cand-table"><thead><tr>' +
+    '<th class="th-strip"></th>' +
+    '<th class="th-name">Candidates</th>' +
+    '<th class="th-pct">Percentage</th>' +
+    '<th class="th-votes">Votes</th>' +
+  '</tr></thead><tbody>';
+
+  for (var i=0;i<sorted.length;i++) {
+    var c=sorted[i], v=votes[String(c.cand_id)]||0, p=pctStr(v,total);
+    var isCal=(c.cand_id===calledId&&race.called), color=colorMap[c.cand_id];
+    var photo=PHOTO_MAP[c.cand_id]||null, photoPos=PHOTO_POS_MAP[c.cand_id]||'top';
+
+    var callHtml=isCal&&callT0?'<span class="cand-call-time">Race called: '+fmtTime(callT0)+'</span>':'';
+
+    var photoHtml='';
+    if (hasPhotos) {
+      photoHtml='<div style="width:40px;height:40px;border-radius:4px;overflow:hidden;flex-shrink:0;background:#e8e8e8;margin-right:10px">'+(photo?'<img src="'+photo+'" alt="'+dispName(c)+'" style="width:40px;height:40px;object-fit:cover;object-position:'+photoPos+'">':'')+'</div>';
+    }
+
+    var pctCell=hasRes
+      ?'<div class="pct-wrap"><span class="pct-num">'+p+'%</span><div class="bar-track"><div class="bar-fill" style="width:'+p+'%;background:'+color+'"></div></div></div>'
+      :'<span class="no-results">&mdash;</span>';
+
+    html+='<tr class="'+(isCal?'row-called':'')+'">' +
+      '<td class="td-strip" style="background:'+color+'"></td>' +
+      '<td class="td-name"><div style="display:flex;align-items:center">'+photoHtml +
+        '<div><span class="cand-name'+(isCal?' winner':'')+'">'+dispName(c)+(isCal?'<span class="cand-check" style="color:'+color+'">&#x2713;</span>':'')+'</span>'+callHtml+'</div>' +
+      '</div></td>' +
+      '<td class="td-pct">'+pctCell+'</td>' +
+      '<td class="td-votes">'+(hasRes?fmt(v):'&mdash;')+'</td>' +
+    '</tr>';
+  }
+
+  html+='</tbody><tfoot><tr><td></td><td class="td-foot-label">Total</td>' +
+    '<td style="text-align:right;padding-right:12px"><button class="toggle-link" onclick="switchView(\'local\')">&#x1F4CD;&nbsp;Local results</button></td>' +
+    '<td class="td-foot-total">'+(hasRes?fmt(total):'&mdash;')+'</td></tr></tfoot></table>';
+
+  document.getElementById('statewide-view').innerHTML=html;
+}
+
+// ── Map: build town-result lookup ─────────────────────────────────────────────
+function buildMapTownResults() {
+  mapTownResults={};
+  var top=race.topline_results;
+  var colorMap=buildColorMap(race.candidates,top.votes,top.total_votes);
+  var towns=flattenTowns(race);
+  for (var i=0;i<towns.length;i++) {
+    var t=towns[i], tot=sumVotes(t.votes); if(tot===0) continue;
+    var sc=race.candidates.slice().sort(function(a,b){return(t.votes[String(b.cand_id)]||0)-(t.votes[String(a.cand_id)]||0);});
+    mapTownResults[t.name]={
+      color: colorMap[sc[0].cand_id],
+      allResults: sc.map(function(c){return{lastName:c.last_name,pct:(t.votes[String(c.cand_id)]||0)/tot*100,color:colorMap[c.cand_id]};})
+    };
+  }
+}
+
+// ── Map: SVG rendering ────────────────────────────────────────────────────────
+function buildPathsHTML() {
+  var html='';
+  if (unorganizedGeo) {
+    for (var i=0;i<unorganizedGeo.features.length;i++) {
+      var d=featureToPath(unorganizedGeo.features[i]);
+      if (d) html+='<path d="'+d+'" fill="#e4e4e4" stroke="#fff" stroke-width="0.5"/>';
+    }
+  }
+  for (var j=0;j<resultsGeo.features.length;j++) {
+    var feat=resultsGeo.features[j];
+    var name=(feat.properties&&feat.properties.municipality)||'';
+    var res=mapTownResults[name];
+    var fill=res?res.color:'#ddd', op=res?'0.9':'0.65';
+    var d2=featureToPath(feat);
+    if (d2) html+='<path d="'+d2+'" fill="'+fill+'" fill-opacity="'+op+'" stroke="#fff" stroke-width="0.5" data-town="'+name.replace(/"/g,'&quot;')+'"/>';
+  }
+  return html;
+}
+
+function renderMapPaths() {
+  if (!resultsGeo||!mapGEl) return;
+  buildMapTownResults();
+  mapGEl.innerHTML=buildPathsHTML();
+  updateMapTransform();
+}
+
+function renderMapLegend() {} // legend removed
+
+// ── Map: init (called at page load) ──────────────────────────────────────────
+function initMap() {
+  // Create SVG immediately
+  mapSvgEl=document.createElementNS('http://www.w3.org/2000/svg','svg');
+  mapSvgEl.id='map-svg';
+  mapSvgEl.setAttribute('viewBox','0 0 '+MAP_W+' '+MAP_H);
+  mapSvgEl.setAttribute('preserveAspectRatio','xMidYMid meet');
+  mapGEl=document.createElementNS('http://www.w3.org/2000/svg','g');
+  mapSvgEl.appendChild(mapGEl);
+  mapSvgEl.addEventListener('mousemove', onMapMouseMove);
+  mapSvgEl.addEventListener('mouseleave',onMapMouseLeave);
+  mapSvgEl.addEventListener('mousedown', onMapMouseDown);
+  mapSvgEl.addEventListener('touchstart',onMapTouchStart,{passive:false});
+  mapSvgEl.addEventListener('touchmove', onMapTouchMove, {passive:false});
+  mapSvgEl.addEventListener('touchend',  onMapTouchEnd);
+  var container=document.getElementById('map-container');
+  container.innerHTML='';
+  container.appendChild(mapSvgEl);
+
+  function tryRender() {
+    if (!resultsGeo) return;
+    renderMapPaths();
+    renderMapLegend();
+  }
+  fetch(GEO_BASE+'/maine-results.geojson')
+    .then(function(r){return r.json();})
+    .then(function(d){resultsGeo=d;tryRender();})
+    .catch(function(){document.getElementById('map-container').innerHTML='<div class="map-loading" style="color:#cc2929">Map unavailable</div>';});
+  fetch(GEO_BASE+'/maine-unorganized.geojson')
+    .then(function(r){return r.json();})
+    .then(function(d){unorganizedGeo=d;if(resultsGeo)renderMapPaths();})
+    .catch(function(){});
+}
+
+// ── Map: tooltip ──────────────────────────────────────────────────────────────
+function onMapMouseMove(e) {
+  if (isDragging){hideMapTip();return;}
+  var townName=e.target&&e.target.getAttribute&&e.target.getAttribute('data-town');
+  var tipEl=document.getElementById('map-tooltip');
+  if (!townName){tipEl.style.display='none';tooltipTown=null;return;}
+  var wrap=document.getElementById('map-wrap');
+  var rect=wrap.getBoundingClientRect();
+  var tx=Math.min(e.clientX-rect.left+12,rect.width-155);
+  var ty=Math.max(e.clientY-rect.top-10,4);
+  tipEl.style.left=tx+'px'; tipEl.style.top=ty+'px'; tipEl.style.display='block';
+  if (tooltipTown===townName) return;
+  tooltipTown=townName;
+  var res=mapTownResults[townName]||null;
+  var html='<div class="tt-name">'+townName+'</div>';
+  if (res) {
+    var rows=res.allResults.filter(function(r){return r.pct>0;});
+    for (var i=0;i<rows.length;i++)
+      html+='<div class="tt-row"><span class="tt-dot" style="background:'+rows[i].color+'"></span><span>'+rows[i].lastName+'</span><span class="tt-pct">'+rows[i].pct.toFixed(1)+'%</span></div>';
+  } else { html+='<div class="tt-na">No results yet</div>'; }
+  tipEl.innerHTML=html;
+}
+function onMapMouseLeave(){hideMapTip();}
+function hideMapTip(){document.getElementById('map-tooltip').style.display='none';tooltipTown=null;}
+
+// ── Map: drag ─────────────────────────────────────────────────────────────────
+function onMapMouseDown(e) {
+  if (mapZoom<=1) return;
+  isDragging=true; dragStart={x:e.clientX,y:e.clientY,panX:mapPanX,panY:mapPanY};
+  mapSvgEl.style.cursor='grabbing'; e.preventDefault();
+}
+function onMapTouchStart(e) {
+  if (mapZoom<=1||e.touches.length!==1) return;
+  isDragging=true; dragStart={x:e.touches[0].clientX,y:e.touches[0].clientY,panX:mapPanX,panY:mapPanY};
+  e.preventDefault();
+}
+function onMapTouchMove(e) {
+  if (!isDragging||!dragStart||e.touches.length!==1) return;
+  var rect=mapSvgEl.getBoundingClientRect();
+  mapPanX=dragStart.panX+(e.touches[0].clientX-dragStart.x)*MAP_W/rect.width;
+  mapPanY=dragStart.panY+(e.touches[0].clientY-dragStart.y)*MAP_H/rect.height;
+  updateMapTransform(); e.preventDefault();
+}
+function onMapTouchEnd(){isDragging=false;dragStart=null;}
+function onWindowMouseMove(e) {
+  if (!isDragging||!dragStart||!mapSvgEl) return;
+  var rect=mapSvgEl.getBoundingClientRect();
+  mapPanX=dragStart.panX+(e.clientX-dragStart.x)*MAP_W/rect.width;
+  mapPanY=dragStart.panY+(e.clientY-dragStart.y)*MAP_H/rect.height;
+  updateMapTransform();
+}
+function onWindowMouseUp() {
+  if (!isDragging) return;
+  isDragging=false; dragStart=null;
+  if (mapSvgEl) mapSvgEl.style.cursor=mapZoom>1?'grab':'default';
+}
+function updateMapTransform() {
+  if (!mapGEl) return;
+  mapGEl.setAttribute('transform','translate('+mapPanX+' '+mapPanY+') scale('+mapZoom+')');
+  if (mapSvgEl) mapSvgEl.style.cursor=mapZoom>1?(isDragging?'grabbing':'grab'):'default';
+}
+function handleZoom(delta) {
+  var nz=Math.max(1,Math.min(4,mapZoom+delta));
+  if (nz===mapZoom) return;
+  if (nz===1){mapZoom=1;mapPanX=0;mapPanY=0;}
+  else{var cx=MAP_W/2,cy=MAP_H/2;mapPanX=cx-(cx-mapPanX)/mapZoom*nz;mapPanY=cy-(cy-mapPanY)/mapZoom*nz;mapZoom=nz;}
+  updateMapTransform();
+  document.getElementById('zoom-in').disabled=mapZoom>=4;
+  document.getElementById('zoom-out').disabled=mapZoom<=1;
+}
+
+// ── Render: town table ────────────────────────────────────────────────────────
+function renderTownTable() {
+  var top=race.topline_results;
+  var colorMap=buildColorMap(race.candidates,top.votes,top.total_votes);
+  var sorted=sortedCands(race.candidates,top.votes);
+  var towns=reportingTowns(race);
+
+  var filtered=towns.filter(function(t){
+    if(!townSearch)return true;
+    var q=townSearch.toLowerCase();
+    return t.name.toLowerCase().indexOf(q)!==-1||(t.county&&t.county.toLowerCase().indexOf(q)!==-1);
+  }).slice().sort(function(a,b){
+    if (sortKey==='name'){var cmp=a.name.localeCompare(b.name);return sortDir==='asc'?cmp:-cmp;}
+    var at=sumVotes(a.votes),bt=sumVotes(b.votes);
+    if(at===0&&bt===0)return a.name.localeCompare(b.name);
+    if(at===0)return 1; if(bt===0)return -1;
+    var av,bv;
+    if(sortKey==='total'){av=at;bv=bt;}
+    else{var k=String(sortKey);av=(a.votes[k]||0)/at;bv=(b.votes[k]||0)/bt;}
+    return sortDir==='desc'?bv-av:av-bv;
+  });
+
+  var totalPages=Math.max(1,Math.ceil(filtered.length/PAGE_SIZE));
+  if(townPage>totalPages)townPage=totalPages;
+  var page=filtered.slice((townPage-1)*PAGE_SIZE,townPage*PAGE_SIZE);
+
+  function arrow(key){
+    if(String(sortKey)!==String(key))return '<span class="sort-arrow dim">&#x2195;</span>';
+    return '<span class="sort-arrow">'+(sortDir==='desc'?'&#x2193;':'&#x2191;')+'</span>';
+  }
+  function thSt(key){
+    if(String(sortKey)!==String(key))return '';
+    var col=(key==='name'||key==='total')?'#1a1a1a':(colorMap[key]||'#1a1a1a');
+    return 'color:'+col+';font-weight:700;';
+  }
+
+  var thead='<thead><tr><th class="th-town" onclick="setSort(\'name\')" style="'+thSt('name')+'">Town'+arrow('name')+'</th>';
+  for (var ci=0;ci<sorted.length;ci++) {
+    var c=sorted[ci];
+    thead+='<th class="th-cand" onclick="setSort('+c.cand_id+')" style="'+thSt(c.cand_id)+'">' +
+      '<span class="color-dot" style="background:'+colorMap[c.cand_id]+'"></span>'+c.last_name+arrow(c.cand_id)+'</th>';
+  }
+  thead+='<th class="th-total" onclick="setSort(\'total\')" style="'+thSt('total')+'">Total'+arrow('total')+'</th></tr></thead>';
+
+  var tbody='<tbody>';
+  if (!page.length) {
+    tbody+='<tr><td colspan="'+(sorted.length+2)+'" class="town-empty">'+(townSearch?'No towns match &ldquo;'+townSearch+'&rdquo;':'No results yet')+'</td></tr>';
+  } else {
+    for (var ri=0;ri<page.length;ri++) {
+      var t=page[ri], tot=sumVotes(t.votes), maxV=0;
+      for (var mi=0;mi<sorted.length;mi++){var mv=t.votes[String(sorted[mi].cand_id)]||0;if(mv>maxV)maxV=mv;}
+      tbody+='<tr><td class="td-town">'+t.name+'</td>';
+      for (var pi=0;pi<sorted.length;pi++) {
+        var cand=sorted[pi], cv=t.votes[String(cand.cand_id)]||0;
+        var cp=tot>0?(cv/tot*100).toFixed(1):null;
+        var isLdr=cv===maxV&&cv>0, isSorted=String(sortKey)===String(cand.cand_id);
+        var st=isLdr?'color:'+colorMap[cand.cand_id]+';font-weight:700':'color:#767676';
+        tbody+='<td class="td-cand'+(isSorted?' sorted':'')+'">'+
+          (cp!==null?'<span style="'+st+'">'+cp+'%</span>':'<span class="pct-dim">&mdash;</span>')+'</td>';
+      }
+      tbody+='<td class="td-total">'+(tot>0?fmt(tot):'<span class="pct-dim">&mdash;</span>')+'</td></tr>';
+    }
+  }
+  tbody+='</tbody>';
+  document.getElementById('town-table').innerHTML=thead+tbody;
+
+  var footText=filtered.length===0?'No results yet':filtered.length+' '+(filtered.length===1?'municipality':'municipalities')+' reporting';
+  for (var si=0;si<sorted.length;si++) if(sorted[si].cand_id===sortKey){footText+=' &middot; Sorted by '+sorted[si].last_name;break;}
+
+  var paginationHtml='';
+  if(totalPages>1) paginationHtml='<div class="pagination">' +
+    '<button class="page-btn" onclick="setPage('+(townPage-1)+')"'+(townPage===1?' disabled':'')+'>&#x2190;</button>' +
+    '<span class="page-label">'+townPage+' / '+totalPages+'</span>' +
+    '<button class="page-btn" onclick="setPage('+(townPage+1)+')"'+(townPage===totalPages?' disabled':'')+'>&#x2192;</button></div>';
+
+  document.getElementById('town-footer').innerHTML='<span>'+footText+'</span>'+paginationHtml;
+}
+
+// ── View switching ────────────────────────────────────────────────────────────
+var lockedH = 0;
+function switchView(v) {
+  activeView = v;
+  var sw = document.getElementById('statewide-view');
+  var lv = document.getElementById('local-view');
+  if (v === 'local') {
+    lockedH = sw.offsetHeight;
+    sw.style.display = 'none';
+    lv.style.cssText = 'display:flex;flex-direction:column;height:'+lockedH+'px;overflow:hidden;';
+    var scroll = lv.querySelector('.town-scroll');
+    if (scroll) { scroll.style.flex = '1'; scroll.style.maxHeight = 'none'; }
+    renderTownTable();
+  } else {
+    lv.style.cssText = 'display:none;';
+    var scroll = lv.querySelector('.town-scroll');
+    if (scroll) { scroll.style.flex = ''; scroll.style.maxHeight = '370px'; }
+    sw.style.display = '';
+  }
+}
+
+// ── Event handlers ────────────────────────────────────────────────────────────
+function setSort(key){
+  if(String(sortKey)===String(key))sortDir=sortDir==='desc'?'asc':'desc';
+  else{sortKey=key;sortDir='desc';}
+  townPage=1; renderTownTable();
+}
+function setPage(p){
+  var towns=reportingTowns(race).filter(function(t){
+    if(!townSearch)return true;var q=townSearch.toLowerCase();
+    return t.name.toLowerCase().indexOf(q)!==-1||(t.county&&t.county.toLowerCase().indexOf(q)!==-1);
+  });
+  townPage=Math.min(Math.max(1,p),Math.max(1,Math.ceil(towns.length/PAGE_SIZE)));
+  renderTownTable();
+}
+function onSearch(val){townSearch=val;townPage=1;renderTownTable();}
+
+// ── Live polling (race data + auto-updates) ───────────────────────────────────
+function poll() {
+  if (!DATA_URL) return;
+  fetch(DATA_URL,{cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(d){
+      race=d;
+      renderHeader();
+      renderStatusBar();
+      if(activeView==='statewide')renderStatewideTable();
+      else renderTownTable();
+      if(resultsGeo){buildMapTownResults();renderMapPaths();renderMapLegend();}
+      // Trigger auto-event generation (milestones, bellwethers, call events)
+      fetch(DATA_URL+'/auto-updates',{method:'POST'}).catch(function(){});
+      // Update last-refreshed timestamp
+      var lu=document.getElementById('last-upd');
+      if(lu) lu.textContent='Live results · last refreshed '+new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',second:'2-digit'});
+    })
+    .catch(function(e){console.warn('[BDN embed] poll failed:',e);});
+}
+
+// ── Events ticker ─────────────────────────────────────────────────────────────
+var tickerEvents = DATA_URL ? [] : [
+  { id:'m1', created_at:'2026-06-09T22:30:00-04:00', condition_key:'milestone-24', category:'milestone', text:'24% of estimated votes are in. Baldacci leads with 40.0%, Dunlap at 30.0%.' },
+  { id:'m2', created_at:'2026-06-09T22:00:00-04:00', condition_key:'bigdrop-Bangor', category:'milestone', text:'Bangor results in — Baldacci leads with 40.1% in the largest CD2 city.' },
+  { id:'m3', created_at:'2026-06-09T21:45:00-04:00', condition_key:'milestone-10', category:'milestone', text:'10% of estimated votes are in. Baldacci and Dunlap running strong across northern Maine.' },
+];
+var tickerPrevIds=new Set(), tickerNewIds=new Set();
+var tickerInterval=null;
+var tickerAuthed=false; try{tickerAuthed=!!sessionStorage.getItem('bdn_update_auth');}catch(e){}
+var tickerShowForm=false, tickerShowPwd=false, tickerPwdErr=false, tickerSubmitting=false;
+
+var TICKER_BADGES={
+  call:      {label:'CALLED',        color:'#166534',bg:'#dcfce7'},
+  milestone: {label:'MILESTONE',     color:'#92400e',bg:'#fef3c7'},
+  note:      {label:'NOTE',          color:'#1e40af',bg:'#dbeafe'},
+  ai:        {label:'AI',            color:'#6b21a8',bg:'#f3e8ff'},
+  story:     {label:'STORY',         color:'#065f46',bg:'#d1fae5'},
+  bellwether:{label:'BELLWETHER',    color:'#0f5c6e',bg:'#d0f0f7'},
+  bigdrop:   {label:'BIG VOTE DROP', color:'#5b2d8e',bg:'#ede9fe'},
+};
+
+function getTickerBadge(ev){
+  var k=ev.condition_key||'';
+  if(k.startsWith('bellwether-')) return TICKER_BADGES.bellwether;
+  if(k.startsWith('milestone-'))  return TICKER_BADGES.milestone;
+  if(k.startsWith('call-'))       return TICKER_BADGES.call;
+  if(k.startsWith('bigdrop-'))    return TICKER_BADGES.bigdrop;
+  if(!ev.condition_key)           return TICKER_BADGES[ev.category]||TICKER_BADGES.note;
+  return null;
+}
+function getTickerText(ev){
+  return (ev.condition_key||'').startsWith('bellwether-')?ev.text.replace(/Bellwether:\s*/i,''):ev.text;
+}
+function fmtTkTime(iso){
+  return new Date(iso).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/New_York'});
+}
+function tickerAuthHdr(){
+  try{var pw=sessionStorage.getItem('bdn_update_auth');return pw?'Bearer '+pw:null;}catch(e){return null;}
+}
+
+function fetchEvents(){
+  if(!DATA_URL) return;
+  fetch(DATA_URL+'/events',{cache:'no-store'})
+    .then(function(r){if(!r.ok)throw new Error(r.status);return r.json();})
+    .then(function(data){
+      tickerEvents=data;
+      var incoming=data.map(function(e){return e.id;}).filter(function(id){return!tickerPrevIds.has(id);});
+      if(incoming.length&&tickerPrevIds.size){
+        tickerNewIds=new Set(incoming);
+        setTimeout(function(){tickerNewIds=new Set();renderTicker();},4000);
+      }
+      tickerPrevIds=new Set(data.map(function(e){return e.id;}));
+      renderTicker();
+      if(data.some(function(e){return e.category==='call';})&&tickerInterval){
+        clearInterval(tickerInterval);tickerInterval=null;
+      }
+    }).catch(function(){});
+}
+
+function renderTicker(){
+  var wrap=document.getElementById('ticker-wrap');
+  if(!wrap) return;
+  wrap.style.display='';
+
+  var showCancel=tickerShowForm||tickerShowPwd;
+  var html='<div class="ticker-card">'+
+    '<div class="ticker-hdr">'+
+      '<span class="ticker-title"><span class="ticker-pulse"></span>Live Updates</span>'+
+      (showCancel?'<button class="ticker-cancel" onclick="tickerCancelForms()">Cancel</button>':'')+
+    '</div>';
+
+  if(tickerShowPwd){
+    html+='<div class="ticker-form-wrap"><form onsubmit="tickerSignIn(event)">'+
+      '<input id="ticker-pwd" type="password" class="ticker-inp'+(tickerPwdErr?' err':'')+'" placeholder="Password" autofocus>'+
+      (tickerPwdErr?'<div style="font-size:11px;color:#cc2929;margin-bottom:6px">Incorrect password</div>':'')+
+      '<div class="ticker-row"><button class="ticker-post" type="submit">Sign in</button></div>'+
+      '</form></div>';
+  }
+  if(tickerShowForm){
+    html+='<div class="ticker-form-wrap"><form onsubmit="tickerSubmit(event)">'+
+      '<input id="ticker-url" type="url" class="ticker-inp" placeholder="BDN story URL (optional)">'+
+      '<textarea id="ticker-text" class="ticker-inp ticker-ta" rows="2" placeholder="What\'s happening?"></textarea>'+
+      '<div class="ticker-row">'+
+        '<input id="ticker-author" type="text" class="ticker-inp" style="width:180px;margin-bottom:0" placeholder="Reporter name (optional)">'+
+        '<button class="ticker-post" type="submit"'+(tickerSubmitting?' disabled':'')+'>'+
+          (tickerSubmitting?'Posting…':'Post')+'</button>'+
+      '</div></form></div>';
+  }
+
+  if(!tickerEvents.length){
+    html+='<div class="ticker-empty">No updates yet.</div>';
+  } else {
+    html+='<div class="ticker-feed"><ul style="list-style:none;margin:0;padding:0">';
+    for(var i=0;i<tickerEvents.length;i++){
+      var ev=tickerEvents[i];
+      var badge=getTickerBadge(ev), txt=getTickerText(ev);
+      var isCall=ev.category==='call'||(ev.condition_key||'').startsWith('call-');
+      var rowBg=isCall?'background:#fef2f2;':tickerNewIds.has(ev.id)?'background:#fffbeb;':'';
+      var delBtn=tickerAuthHdr()?'<button class="ticker-del" onclick="tickerDelete(\''+ev.id+'\')">&#x2715;</button>':'';
+      html+='<li class="ticker-evt" style="'+rowBg+'">'+
+        '<span class="ticker-time">'+fmtTkTime(ev.created_at)+'</span>';
+      if(badge) html+='<span class="ticker-badge" style="color:'+badge.color+';background:'+badge.bg+'">'+badge.label+'</span>';
+      html+='<div class="ticker-body">';
+      if(txt) html+='<p style="margin:0">'+txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p>';
+      if(ev.category==='story'&&ev.url&&ev.story_meta){
+        var sm=ev.story_meta;
+        html+='<a class="story-card" href="'+ev.url+'" target="_blank" rel="noopener noreferrer">'+
+          (sm.image?'<img class="story-img" src="'+sm.image+'" alt="">':'')+
+          '<div class="story-meta"><p class="story-ttl">'+sm.title+'</p><p class="story-src">bangordailynews.com →</p></div>'+
+          '</a>';
+      }
+      html+='</div>';
+      if(ev.author) html+='<span class="ticker-author">— '+ev.author+'</span>';
+      html+=delBtn+'</li>';
+    }
+    html+='</ul></div>';
+  }
+  html+='</div>';
+  wrap.innerHTML=html;
+}
+
+function tickerCancelForms(){tickerShowForm=false;tickerShowPwd=false;tickerPwdErr=false;renderTicker();}
+function tickerSignIn(e){
+  e.preventDefault();
+  var pw=document.getElementById('ticker-pwd');
+  if(!pw||!pw.value.trim()) return;
+  try{sessionStorage.setItem('bdn_update_auth',pw.value.trim());}catch(ex){}
+  tickerAuthed=true;tickerPwdErr=false;tickerShowPwd=false;tickerShowForm=true;renderTicker();
+}
+function tickerSubmit(e){
+  e.preventDefault();
+  var urlEl=document.getElementById('ticker-url'), textEl=document.getElementById('ticker-text'), authorEl=document.getElementById('ticker-author');
+  var urlVal=urlEl?urlEl.value.trim():'', textVal=textEl?textEl.value.trim():'', authorVal=authorEl?authorEl.value.trim():'';
+  if(!urlVal&&!textVal) return;
+  tickerSubmitting=true; renderTicker();
+  var body={text:textVal,category:urlVal?'story':'note'};
+  if(authorVal) body.author=authorVal;
+  if(urlVal)    body.url=urlVal;
+  var auth=tickerAuthHdr();
+  var hdrs={'Content-Type':'application/json'};
+  if(auth) hdrs['Authorization']=auth;
+  fetch(DATA_URL+'/events',{method:'POST',headers:hdrs,body:JSON.stringify(body)})
+    .then(function(r){
+      if(r.status===401){
+        try{sessionStorage.removeItem('bdn_update_auth');}catch(ex){}
+        tickerAuthed=false;tickerPwdErr=true;tickerShowPwd=true;tickerShowForm=false;
+      } else {tickerShowForm=false;fetchEvents();}
+    }).catch(function(){})
+    .then(function(){tickerSubmitting=false;renderTicker();});
+}
+function tickerDelete(id){
+  var auth=tickerAuthHdr(); if(!auth) return;
+  fetch(DATA_URL+'/events',{method:'DELETE',headers:{'Content-Type':'application/json','Authorization':auth},body:JSON.stringify({id:id})})
+    .then(function(r){
+      if(r.status===401){
+        try{sessionStorage.removeItem('bdn_update_auth');}catch(ex){}
+        tickerAuthed=false;tickerShowPwd=true;renderTicker();
+      } else {fetchEvents();}
+    }).catch(function(){});
+}
+
+// Ctrl+Cmd+W,O,W hotkey to open ticker editor
+(function(){
+  var SEQ=['w','o','w'],step=0;
+  document.addEventListener('keydown',function(e){
+    if(!e.metaKey||!e.ctrlKey){step=0;return;}
+    if(e.key.toLowerCase()===SEQ[step]){
+      e.preventDefault();step++;
+      if(step===SEQ.length){
+        step=0; if(!DATA_URL) return;
+        if(!tickerAuthed){tickerShowPwd=!tickerShowPwd;tickerShowForm=false;}
+        else             {tickerShowForm=!tickerShowForm;tickerShowPwd=false;}
+        renderTicker();
+      }
+    } else {step=e.key.toLowerCase()===SEQ[0]?1:0;}
+  });
+})();
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+window.addEventListener('mousemove',onWindowMouseMove);
+window.addEventListener('mouseup',  onWindowMouseUp);
+
+renderHeader();
+renderStatusBar();
+renderStatewideTable();
+initMap();   // starts fetching GeoJSON immediately
+renderTicker();
+if(DATA_URL){
+  poll();
+  setInterval(poll,POLL_MS);
+  fetchEvents();
+  tickerInterval=setInterval(fetchEvents,POLL_MS);
+}
+</script>
+</body>
+</html>
