@@ -12,7 +12,7 @@ function makeSlug(office: string, party: string, district: string | null, specia
   return parts.join('-')
 }
 
-function transform(r: any): Race {
+export function transform(r: any): Race {
   const topline = r.topline_results ?? {}
   const isSpecial = r.election_type_id === 9
   return {
