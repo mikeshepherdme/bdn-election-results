@@ -35,7 +35,7 @@ async function getToken(): Promise<string> {
 // ── Race cache ────────────────────────────────────────────────────────────────
 let raceCache:  Race[] | null = null
 let raceCacheAt = 0
-const RACE_TTL  = 30_000    // 30 seconds
+const RACE_TTL  = 120_000   // 2 minutes
 
 export async function getAllRaces(): Promise<Race[]> {
   if (raceCache && Date.now() - raceCacheAt < RACE_TTL) return raceCache
