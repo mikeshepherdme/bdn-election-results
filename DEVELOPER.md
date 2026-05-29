@@ -1,7 +1,31 @@
-# BDN Election Results — Developer Handoff
+# BDN 2026 Primary Election Results — Developer Guide
 
 Live election results app for the Bangor Daily News, covering Maine's June 9, 2026 primary.  
-Built by the BDN newsroom. Data provided by [Decision Desk HQ](https://decisiondeskhq.com).
+Data provided by [Decision Desk HQ](https://decisiondeskhq.com).
+
+---
+
+## Architecture overview
+
+```
+DDHQ API  (OAuth2, live vote data)
+    │
+    ▼
+bdn-election-results              Next.js 15 app, deployed on Vercel
+  /api/race/[slug]                Single race — full data incl. town breakdown
+  /api/races                      Bulk multi-race — slim payloads for grid embeds
+  /api/town/[name]                All races for a given town
+  /api/towns                      All town names (autocomplete)
+  /api/race/[slug]/events         Manual live-update ticker entries
+  /api/race/[slug]/auto-updates   Server-side auto-event generation
+    │
+    ├──▶  Vercel result pages     Next.js React pages (race detail, town view, homepage)
+    │
+    └──▶  bdn-election-embeds     Static HTML, hosted on GitHub Pages
+            12 standalone embed files (see section below)
+```
+
+Each embed polls its Vercel API endpoint every 30 seconds and re-renders without a page reload. All API routes include `Access-Control-Allow-Origin: *` so they can be called from any origin.
 
 ---
 
@@ -12,257 +36,235 @@ Built by the BDN newsroom. Data provided by [Decision Desk HQ](https://decisiond
 | Framework | Next.js 15 (App Router) |
 | Language | TypeScript 5 |
 | UI | React 19, Tailwind CSS v4 |
-| Maps | Leaflet + react-leaflet, d3-geo |
-| Data fetching (client) | SWR |
-| Data pipeline | Python 3 (`ddhq_poller.py`) |
-| Database (target) | Supabase (Postgres) |
-| Hosting | TBD — currently static export capable |
+| Hosting — API | Vercel (`bdn-election-results.vercel.app`) |
+| Hosting — Embeds | GitHub Pages (`mikeshepherdme.github.io/bdn-election-embeds`) |
+| Data source | Decision Desk HQ REST API v4 |
 
 ---
 
-## Running locally
+## Environment variables
 
-```bash
-npm install
-cp .env.local.example .env.local   # fill in credentials (see below)
-npm run dev                         # http://localhost:3000
-```
+Set in Vercel → Project → Settings → Environment Variables. Locally, copy `.env.local.example` to `.env.local`.
 
-The dev server uses Turbopack. All data is read from `data/ddhq_races.json` on every request — no hot module reload needed when you update that file, just refresh the page.
-
----
-
-## Environment variables (`.env.local`)
-
-```
-# DDHQ API credentials — get from your DDHQ account rep
-DDHQ_CLIENT_ID=
-DDHQ_CLIENT_SECRET=
-DDHQ_API_BASE=https://resultsapi.decisiondeskhq.com
-DDHQ_RACE_DATE=2026-06-09
-DDHQ_ELECTION_ID=           # confirm this ID with DDHQ before election night
-
-# Supabase — for the poller to write live results
-SUPABASE_URL=
-SUPABASE_SERVICE_KEY=
-
-# Password protecting the manual live-update editor
-# CHANGE THIS before going live
-UPDATE_PASSWORD=bdn2026
-```
+| Variable | Required | Description |
+|---|---|---|
+| `DDHQ_API_BASE` | Yes | DDHQ base URL — `https://resultsapi.decisiondeskhq.com` |
+| `DDHQ_CLIENT_ID` | Yes | DDHQ OAuth2 client ID |
+| `DDHQ_CLIENT_SECRET` | Yes | DDHQ OAuth2 client secret |
+| `DDHQ_RACE_DATE` | No | Defaults to `2026-06-09` |
+| `UPDATE_PASSWORD` | Recommended | Password for the manual live-update editor. If unset, the endpoint accepts any request. |
 
 `.env.local` is git-ignored and must never be committed.
 
+If `DDHQ_CLIENT_ID` or `DDHQ_CLIENT_SECRET` are missing, `isConfigured()` in `lib/ddhq.ts` returns `false` and all routes fall back to local mock data from `lib/mock-data.ts`.
+
 ---
 
-## Data flow
+## DDHQ authentication (`lib/ddhq.ts`)
 
-There are two phases: **before election night** (static mock data) and **on election night** (live DDHQ feed).
-
-### Current state: mock data
+DDHQ uses OAuth2 `client_credentials`. On first request the server POSTs to `/api/v4/oauth/token`, receives `access_token` + `expires_in`, and stores both in module-level variables. The token is reused until 60 seconds before expiry, then refreshed automatically.
 
 ```
-data/ddhq_races.json
-       │
-       ▼
-lib/mock-data.ts  (loadRaces → transform → getRaces / getRace / getTownRaces)
-       │
-       ├──▶  app/api/race/[slug]/route.ts         GET /api/race/:slug
-       ├──▶  app/api/towns/route.ts               GET /api/towns
-       ├──▶  app/page.tsx                         homepage (server-rendered)
-       ├──▶  app/races/[slug]/page.tsx            race detail page
-       └──▶  app/towns/[slug]/page.tsx            town results page
+POST /api/v4/oauth/token
+  grant_type:    client_credentials
+  client_id:     $DDHQ_CLIENT_ID
+  client_secret: $DDHQ_CLIENT_SECRET
+
+→ { access_token, expires_in }
 ```
 
-`lib/mock-data.ts` reads the JSON file on **every request** (no caching). The `transform()` function normalizes raw DDHQ-shaped objects into the typed `Race` interface from `lib/types.ts` and generates URL slugs.
+---
 
-### Slug format
+## Race data flow
 
-Slugs are generated by `makeSlug()` in `lib/mock-data.ts`:
+1. Any route needing race data calls `getAllRaces()` from `lib/ddhq.ts`.
+2. `getAllRaces()` fetches `GET /api/v4/races?state=ME&race_date=2026-06-09&limit=100`, paginating in parallel using `total_pages`.
+3. Each raw race is passed through `transform()` in `lib/mock-data.ts`, which normalises field names, fills defaults, and returns a typed `Race` object.
+4. Results are cached in memory with a **2-minute TTL**. All requests within that window share the cache without hitting DDHQ again.
+
+**Slug format** — generated by `makeSlug()` in `lib/mock-data.ts`:
 
 ```
-{kebab(office)}-[district-N]-{kebab(party)}-primary
+{kebab(office)}-[district-N-]{kebab(party)}-primary
 ```
 
 Examples:
 - `governor-democratic-primary`
+- `us-senate-democratic-primary`
+- `us-house-district-1-republican-primary`
 - `us-house-district-2-democratic-primary`
-- `state-senate-district-15-republican-primary`
+- `state-senate-district-15-democratic-primary`
 
-The district segment, when present, comes **before** the party segment. Town slugs use a simpler pattern: `kebab(town name)` (e.g. `old-town`, `bar-harbor`).
+District comes **before** party when present.
 
----
-
-## Wiring up the live DDHQ feed
-
-### Step 1 — Confirm election ID with DDHQ
-
-DDHQ assigns a numeric `election_id` to each election. Set `DDHQ_ELECTION_ID` in `.env.local` once you have it. The poller uses `race_date=2026-06-09` as a fallback filter if the ID is unknown.
-
-### Step 2 — Run the poller
-
-`ddhq_poller.py` authenticates with DDHQ using OAuth2 client credentials, fetches all Maine June 9 races (paginated), and writes results to Supabase.
-
-```bash
-# Test connectivity without writing to DB
-python3 ddhq_poller.py --dry-run
-
-# Poll once
-python3 ddhq_poller.py
-
-# Poll every 60 seconds on election night
-python3 ddhq_poller.py --loop
-```
-
-**DDHQ API endpoints used:**
-
-| Method | Path | Purpose |
-|---|---|---|
-| POST | `/api/v4/oauth/token` | Get bearer token (client_credentials) |
-| GET | `/api/v4/races?state=ME&race_date=2026-06-09` | List all races (paginated) |
-| GET | `/api/v4/race/{race_id}` | Full race data including VCU results |
-| GET | `/api/v4/race-calls?state=ME&race_date=2026-06-09` | Race call events |
-
-The token auto-refreshes when it's within 2 minutes of expiry.
-
-### Step 3 — Replace mock data with Supabase reads
-
-Currently `lib/mock-data.ts` reads from `data/ddhq_races.json`. To go live, replace `loadRaces()` to query Supabase instead:
-
-```ts
-// Replace the body of loadRaces() with a Supabase fetch:
-// SELECT races.*, candidates.*, vcu_results.* FROM races ...
-// Then call transform() on each row as before.
-```
-
-The `transform()` function accepts any DDHQ-shaped object, so as long as the Supabase rows mirror the DDHQ API structure (which `ddhq_poller.py`'s `transform_race()` preserves), no other changes are needed.
-
-**Supabase tables written by the poller:**
-
-| Table | Key | Contents |
-|---|---|---|
-| `races` | `race_id` | Topline results, precinct counts, called status |
-| `candidates` | `cand_id` + `race_id` | Candidate names and incumbent flag |
-| `vcu_results` | `vcu_id` + `race_id` | Town-level vote totals |
-| `race_snapshots` | `race_id` + `ts` | Timestamped snapshots for momentum tracking |
-
-All upserts use `Prefer: resolution=merge-duplicates` so re-running the poller is safe.
-
-### Step 4 — Trigger auto-updates after each poll
-
-After writing fresh data, call the auto-update endpoint for each race. This generates live update events (milestone callouts, big vote drops, bellwether towns, race calls) and appends them to `data/race-events.json`:
-
-```bash
-curl -X POST https://your-domain.com/api/race/governor-democratic-primary/auto-updates
-```
-
-Wire this into the end of `poll_once()` in `ddhq_poller.py`, or run it as a separate step.
+**Note on Vercel caching:** Vercel runs serverless functions. The in-memory cache is per-instance — under load, multiple warm instances may each call DDHQ independently within the same 2-minute window. This is acceptable but means DDHQ may see more requests than the TTL suggests.
 
 ---
 
-## Live updates system
+## API routes
 
-### Events file
+### `GET /api/race/[slug]`
 
-`data/race-events.json` is a JSON object keyed by race slug. Each value is an array of `RaceEvent` objects:
+Full `Race` object including all county/VCU (town) vote breakdowns. Used by single-race embeds and Vercel result pages.
 
-```json
-{
-  "governor-democratic-primary": [
-    {
-      "id": "uuid",
-      "created_at": "ISO timestamp",
-      "category": "call",
-      "text": "✅ Janet Mills wins...",
-      "condition_key": "call-12345"
-    }
-  ]
-}
-```
+### `GET /api/races`
 
-`condition_key` is a stable idempotency key so auto-events are never duplicated across poller runs.
+Slim array of races for the grid embeds. Returns per race: `slug, office, party, district, level, election_type_id, uncontested, called, called_candidates, candidates, votes, total_votes, precincts`. Town data is **not** included — embeds fetch it on demand via `/api/race/[slug]` when a user opens the town toggle.
 
-### Event categories
+Query parameters:
 
-| Category | Source | Meaning |
+| Param | Example | Effect |
 |---|---|---|
-| `call` | Auto | Race called — winner declared |
-| `milestone` | Auto | 10/20/.../90% of estimated votes in |
-| `ai` | Auto | Big vote drop (city ≥2k votes) or bellwether town |
-| `note` | Manual | Editor annotation |
-| `story` | Manual | Link to a BDN article (OG metadata auto-fetched) |
+| `office` + `party` | `?office=State+Senate&party=Democratic` | Filter by exact office name and party |
+| `type=da` | `?type=da` | District Attorney races only |
+| `type=county` | `?type=county` | County Commissioner, Sheriff, Register of Deeds, Probate, Treasurer |
 
-### API routes
+### `GET /api/town/[name]` and `GET /api/towns`
 
-| Method | Route | Auth | Purpose |
-|---|---|---|---|
-| GET | `/api/race/[slug]` | None | Full race data |
-| GET | `/api/race/[slug]/events` | None | Events for a race (newest first) |
-| POST | `/api/race/[slug]/events` | Bearer token | Post a manual note or story link |
-| DELETE | `/api/race/[slug]/events` | Bearer token | Remove an event by ID |
-| POST | `/api/race/[slug]/auto-updates` | None | Generate auto-events from current race data |
-| GET | `/api/towns` | None | Sorted list of all town names |
+Used by the town lookup embed. `/api/towns` returns all town names for autocomplete. `/api/town/[name]` returns every race containing that town plus that town's vote breakdown.
 
-### Authentication
+### `GET /api/race/[slug]/events`
+### `POST /api/race/[slug]/events`
+### `DELETE /api/race/[slug]/events`
 
-Manual event posting requires an `Authorization: Bearer <UPDATE_PASSWORD>` header.
+Manual live-update ticker. Events stored in `data/race-events.json` keyed by slug.
 
-The built-in editor UI (in `components/RaceResults.tsx`) stores the password in `sessionStorage` under the key `bdn_update_auth`. Access the editor with the hotkey **Ctrl+Cmd+W+O+W** on any race page.
+**POST** body:
 
-**Change `UPDATE_PASSWORD` in `.env.local` before going live.**
+| Field | Required | Notes |
+|---|---|---|
+| `text` | Yes (unless story) | The update text |
+| `category` | No | `note` (default) or `story` |
+| `author` | No | Reporter name shown in ticker |
+| `url` | No | BDN story URL — triggers og:title/og:image scrape and renders a story card |
+
+Requires `Authorization: Bearer {UPDATE_PASSWORD}` if the env var is set.
+
+**⚠️ Filesystem warning:** `data/race-events.json` is written with `writeFileSync`. Vercel's serverless runtime has a read-only project directory — these writes will fail silently in production. Before election night, migrate event storage to Vercel KV (Redis) or a Postgres table. This is the only part of the stack that is not production-ready as-is.
+
+### `POST /api/race/[slug]/auto-updates`
+
+Called automatically by each single-race embed after every poll cycle. Checks current race state and appends new events to `data/race-events.json` for any thresholds not yet crossed (`condition_key` provides idempotency).
+
+Auto-events generated:
+
+| Condition key | Badge | Trigger |
+|---|---|---|
+| `call-{candId}` | **CALLED** (green) | DDHQ populates `called_candidates` |
+| `milestone-10` … `milestone-90` | **MILESTONE** (amber) | Each 10% threshold of estimated votes |
+| `bigdrop-{town}` | **BIG VOTE DROP** (purple) | Any town reporting ≥ 2,000 votes |
+| `bellwether-{town}` | **BELLWETHER** (teal) | Governor races only — 20 towns whose 2018 results best mirrored statewide outcome (see `lib/bellwether-towns.ts`) |
+
+Auto-updates only run on `State/District` and `Federal` level races.
 
 ---
 
-## Key pages and components
+## The embeds (`bdn-election-embeds` repo)
+
+Static HTML files, no framework. Hosted at `https://mikeshepherdme.github.io/bdn-election-embeds/`. Each file is self-contained and iframeable.
+
+### Single-race embeds (5)
+
+Full-featured: candidate percentage bars, choropleth map of Maine municipalities, live-update ticker, statewide/local view toggle.
+
+| File | Race | Slug |
+|---|---|---|
+| `embed-gov-dem-primary.html` | Governor — Dem | `governor-democratic-primary` |
+| `embed-gov-rep-primary.html` | Governor — Rep | `governor-republican-primary` |
+| `embed-senate-dem-primary.html` | U.S. Senate — Dem | `us-senate-democratic-primary` |
+| `embed-cd1-rep-primary.html` | CD1 — Rep | `us-house-district-1-republican-primary` |
+| `embed-cd2-dem-primary.html` | CD2 — Dem | `us-house-district-2-democratic-primary` |
+
+Config block near the top of each file:
+
+```javascript
+var DATA_URL = 'https://bdn-election-results.vercel.app/api/race/{slug}';
+var POLL_MS  = 30000;
+```
+
+### Multi-race grid embeds (6)
+
+Card grid with candidate bars, `0/XX towns` count, per-card town toggle, uncontested races drawer. No map or ticker.
+
+| File | API query |
+|---|---|
+| `embed-state-senate-dem-primary.html` | `?office=State+Senate&party=Democratic` |
+| `embed-state-senate-rep-primary.html` | `?office=State+Senate&party=Republican` |
+| `embed-state-house-dem-primary.html` | `?office=State+House&party=Democratic` |
+| `embed-state-house-rep-primary.html` | `?office=State+House&party=Republican` |
+| `embed-da-races.html` | `?type=da` |
+| `embed-county-races.html` | `?type=county` |
+
+Config block:
+
+```javascript
+var DATA_URL      = 'https://bdn-election-results.vercel.app/api/races?...';
+var RACE_API_BASE = 'https://bdn-election-results.vercel.app/api/race';
+var POLL_MS       = 30000;
+```
+
+### Town lookup embed (1)
+
+`embed-town-lookup.html` — reader types a town, sees every race for that town with its vote breakdown.
+
+```javascript
+var TOWN_API_BASE = 'https://bdn-election-results.vercel.app/api/town';
+```
+
+---
+
+## Posting a manual live update
+
+The ticker editor is hidden behind a keyboard shortcut.
+
+1. Open a single-race embed in a browser
+2. Hold **Ctrl + Cmd** and type **W**, then **O**, then **W**
+3. Enter the `UPDATE_PASSWORD` value from Vercel
+4. Type a note and optional reporter name, or paste a BDN URL for a story card
+5. Auth persists in `sessionStorage` for the tab session
+
+To delete an entry: open the form with the same shortcut, then click **✕** next to the entry.
+
+---
+
+## Key files
 
 | Path | Role |
 |---|---|
-| `app/page.tsx` | Homepage — races grouped by level (statewide, legislature, county) |
-| `app/races/[slug]/page.tsx` | Race detail — table, map sidebar, municipality breakdown |
-| `app/towns/[slug]/page.tsx` | Town view — all races where that town has reported results |
-| `app/layout.tsx` | Root layout — loads `SiteHeader`, sets global CSS |
-| `components/SiteHeader.tsx` | Sticky two-row header with live race ticker; polls every 30s |
-| `components/RaceTable.tsx` | Candidate results table (used in cards and race pages) |
-| `components/RaceResults.tsx` | Race page main panel; wraps RaceTable + event feed + editor |
-| `components/RaceCard.tsx` | Homepage card (compact table + status bar) |
-| `components/RaceMapSidebar.tsx` | Map + municipality list on race pages |
-| `components/RaceMunicipalityView.tsx` | Town-by-town breakdown table |
-| `lib/mock-data.ts` | Data loading, slug generation, type transformation |
+| `lib/ddhq.ts` | DDHQ OAuth + race fetching + in-memory cache |
+| `lib/mock-data.ts` | `transform()`, slug generation, local mock data fallback |
 | `lib/types.ts` | All TypeScript interfaces + utility functions |
+| `lib/bellwether-towns.ts` | Ranked bellwether town lists per party |
 | `lib/candidate-photos.ts` | Maps `cand_id` → headshot URL |
 | `lib/candidate-colors.ts` | Assigns distinct bar colors per candidate |
-| `lib/bellwether-towns.ts` | Ranked bellwether town lists by party |
+| `app/api/races/route.ts` | Bulk multi-race endpoint |
+| `app/api/race/[slug]/route.ts` | Single-race endpoint |
+| `app/api/race/[slug]/events/route.ts` | Ticker event CRUD |
+| `app/api/race/[slug]/auto-updates/route.ts` | Auto-event generation |
+| `app/api/town/[name]/route.ts` | Town results endpoint |
+| `app/api/towns/route.ts` | Town name list |
+| `data/race-events.json` | Ticker event store (migrate before election night) |
 
 ---
 
-## Header ticker slots
+## Election night checklist
 
-`SiteHeader` shows live results for four hardcoded races. To change which races appear:
-
-```ts
-// components/SiteHeader.tsx
-const SLOTS = [
-  { slug: 'governor-democratic-primary',            label: 'Gov. (D)',    color: '#1A5FAB', wonBg: '#E8F0FA' },
-  { slug: 'governor-republican-primary',            label: 'Gov. (R)',    color: '#CC2929', wonBg: '#FAE8E8' },
-  { slug: 'us-senate-democratic-primary',           label: 'Senate (D)', color: '#1A5FAB', wonBg: '#E8F0FA' },
-  { slug: 'us-house-district-2-democratic-primary', label: 'CD2 (D)',    color: '#1A5FAB', wonBg: '#E8F0FA' },
-]
-```
-
-Slugs must match exactly what `makeSlug()` generates for the corresponding race in the data.
+- [ ] Confirm `DDHQ_CLIENT_ID`, `DDHQ_CLIENT_SECRET`, `DDHQ_API_BASE` are set in Vercel production
+- [ ] Set a strong `UPDATE_PASSWORD` in Vercel
+- [ ] **Migrate event storage** from `data/race-events.json` to Vercel KV or Postgres — flat-file writes do not persist on Vercel serverless
+- [ ] Test `/api/races?office=State+Senate&party=Democratic` returns live DDHQ JSON the evening before
+- [ ] Test `/api/race/governor-democratic-primary` returns full race data with candidates
+- [ ] Test the town lookup with a known Maine town name
+- [ ] Confirm latest embed commit is deployed on GitHub Pages
+- [ ] Open each embed, verify pre-election state (0% bars, correct candidate names)
+- [ ] Test Ctrl+Cmd+W O W shortcut — post a test note, confirm it appears, then delete it
+- [ ] Verify auto-updates fire: hit `POST /api/race/governor-democratic-primary/auto-updates` and confirm no server errors
 
 ---
 
-## Before going live checklist
+## Repos
 
-- [ ] Confirm `DDHQ_ELECTION_ID` with DDHQ
-- [ ] Populate all `.env.local` credentials
-- [ ] Run `python3 ddhq_poller.py --dry-run` to verify DDHQ connectivity
-- [ ] Replace `lib/mock-data.ts` `loadRaces()` with Supabase query
-- [ ] Set a strong `UPDATE_PASSWORD`
-- [ ] Add candidate headshots to `lib/candidate-photos.ts` (keyed by `cand_id`)
-- [ ] Verify header ticker slugs match actual race data
-- [ ] Test the editor hotkey (Ctrl+Cmd+W+O+W) and manual note posting
-- [ ] Confirm `force-dynamic` is set on all API routes (already done)
-- [ ] Set up the poller on a server that will run on election night (cron or `--loop`)
-- [ ] Wire poller to call `/api/race/[slug]/auto-updates` after each poll cycle
+| Repo | GitHub | Live URL |
+|---|---|---|
+| `bdn-election-results` | github.com/mikeshepherdme/bdn-election-results | bdn-election-results.vercel.app |
+| `bdn-election-embeds` | github.com/mikeshepherdme/bdn-election-embeds | mikeshepherdme.github.io/bdn-election-embeds |
