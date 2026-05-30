@@ -1,0 +1,746 @@
+{
+  "State House|1": {
+    "count": 13,
+    "label": "Aroostook County"
+  },
+  "State House|10": {
+    "count": 15,
+    "label": "Washington County"
+  },
+  "State House|100": {
+    "count": 1,
+    "label": "Part of Brunswick"
+  },
+  "State House|101": {
+    "count": 1,
+    "label": "Part of Brunswick"
+  },
+  "State House|102": {
+    "count": 1,
+    "label": "Part of Freeport"
+  },
+  "State House|103": {
+    "count": 1,
+    "label": "Part of Yarmouth"
+  },
+  "State House|104": {
+    "count": 2,
+    "label": "Gray, New Gloucester"
+  },
+  "State House|105": {
+    "count": 2,
+    "label": "Gray, North Yarmouth"
+  },
+  "State House|106": {
+    "count": 1,
+    "label": "Part of Windham"
+  },
+  "State House|107": {
+    "count": 1,
+    "label": "Part of Windham"
+  },
+  "State House|108": {
+    "count": 1,
+    "label": "Part of Gorham"
+  },
+  "State House|109": {
+    "count": 1,
+    "label": "Part of Gorham"
+  },
+  "State House|11": {
+    "count": 11,
+    "label": "Washington County"
+  },
+  "State House|110": {
+    "count": 3,
+    "label": "Chebeague Island, Cumberland, Long Island"
+  },
+  "State House|111": {
+    "count": 1,
+    "label": "Part of Falmouth"
+  },
+  "State House|112": {
+    "count": 2,
+    "label": "Falmouth, Portland"
+  },
+  "State House|113": {
+    "count": 1,
+    "label": "Part of Portland"
+  },
+  "State House|114": {
+    "count": 1,
+    "label": "Part of Portland"
+  },
+  "State House|115": {
+    "count": 1,
+    "label": "Part of Portland"
+  },
+  "State House|116": {
+    "count": 1,
+    "label": "Part of Portland"
+  },
+  "State House|117": {
+    "count": 1,
+    "label": "Part of Portland"
+  },
+  "State House|118": {
+    "count": 1,
+    "label": "Part of Portland"
+  },
+  "State House|119": {
+    "count": 1,
+    "label": "Part of Portland"
+  },
+  "State House|12": {
+    "count": 7,
+    "label": "Hancock and Washington counties"
+  },
+  "State House|120": {
+    "count": 1,
+    "label": "Part of South Portland"
+  },
+  "State House|121": {
+    "count": 2,
+    "label": "Cape Elizabeth, South Portland"
+  },
+  "State House|122": {
+    "count": 1,
+    "label": "Part of South Portland"
+  },
+  "State House|123": {
+    "count": 1,
+    "label": "Part of Cape Elizabeth"
+  },
+  "State House|124": {
+    "count": 1,
+    "label": "Part of Scarborough"
+  },
+  "State House|125": {
+    "count": 1,
+    "label": "Part of Scarborough"
+  },
+  "State House|126": {
+    "count": 3,
+    "label": "Saco, Scarborough, Westbrook"
+  },
+  "State House|127": {
+    "count": 1,
+    "label": "Part of Westbrook"
+  },
+  "State House|128": {
+    "count": 1,
+    "label": "Part of Westbrook"
+  },
+  "State House|129": {
+    "count": 1,
+    "label": "Part of Saco"
+  },
+  "State House|13": {
+    "count": 2,
+    "label": "Ellsworth, Waltham"
+  },
+  "State House|130": {
+    "count": 1,
+    "label": "Part of Saco"
+  },
+  "State House|131": {
+    "count": 1,
+    "label": "Part of Old Orchard Beach"
+  },
+  "State House|132": {
+    "count": 1,
+    "label": "Part of Biddeford"
+  },
+  "State House|133": {
+    "count": 1,
+    "label": "Part of Biddeford"
+  },
+  "State House|134": {
+    "count": 3,
+    "label": "Biddeford, Kennebunk, Kennebunkport"
+  },
+  "State House|135": {
+    "count": 1,
+    "label": "Part of Kennebunk"
+  },
+  "State House|136": {
+    "count": 3,
+    "label": "Alfred, Lyman, Waterboro"
+  },
+  "State House|137": {
+    "count": 2,
+    "label": "Buxton, Hollis"
+  },
+  "State House|138": {
+    "count": 4,
+    "label": "York County"
+  },
+  "State House|139": {
+    "count": 3,
+    "label": "Limerick, Parsonsfield, Waterboro"
+  },
+  "State House|14": {
+    "count": 4,
+    "label": "Hancock County"
+  },
+  "State House|140": {
+    "count": 3,
+    "label": "Arundel, Dayton, Lyman"
+  },
+  "State House|141": {
+    "count": 3,
+    "label": "Newfield, Sanford, Shapleigh"
+  },
+  "State House|142": {
+    "count": 1,
+    "label": "Part of Sanford"
+  },
+  "State House|143": {
+    "count": 1,
+    "label": "Part of Sanford"
+  },
+  "State House|144": {
+    "count": 2,
+    "label": "Acton, Lebanon"
+  },
+  "State House|145": {
+    "count": 1,
+    "label": "Part of Wells"
+  },
+  "State House|146": {
+    "count": 3,
+    "label": "Ogunquit, Wells, York"
+  },
+  "State House|147": {
+    "count": 1,
+    "label": "Part of York"
+  },
+  "State House|148": {
+    "count": 2,
+    "label": "Berwick, North Berwick"
+  },
+  "State House|149": {
+    "count": 2,
+    "label": "North Berwick, South Berwick"
+  },
+  "State House|15": {
+    "count": 9,
+    "label": "Hancock and Knox counties"
+  },
+  "State House|150": {
+    "count": 3,
+    "label": "Eliot, Kittery, South Berwick"
+  },
+  "State House|151": {
+    "count": 1,
+    "label": "Part of Kittery"
+  },
+  "State House|16": {
+    "count": 6,
+    "label": "Hancock County"
+  },
+  "State House|17": {
+    "count": 4,
+    "label": "Hancock County"
+  },
+  "State House|18": {
+    "count": 16,
+    "label": "Hancock, Washington and Penobscot counties"
+  },
+  "State House|19": {
+    "count": 3,
+    "label": "Eddington, Holden, Orrington"
+  },
+  "State House|2": {
+    "count": 6,
+    "label": "Aroostook County"
+  },
+  "State House|20": {
+    "count": 1,
+    "label": "Part of Brewer"
+  },
+  "State House|21": {
+    "count": 1,
+    "label": "Part of Bangor"
+  },
+  "State House|22": {
+    "count": 1,
+    "label": "Part of Bangor"
+  },
+  "State House|23": {
+    "count": 1,
+    "label": "Part of Bangor"
+  },
+  "State House|24": {
+    "count": 4,
+    "label": "Penobscot County"
+  },
+  "State House|25": {
+    "count": 1,
+    "label": "Part of Orono"
+  },
+  "State House|26": {
+    "count": 3,
+    "label": "Bradley, Old Town, Penobscot Nation Voting District"
+  },
+  "State House|27": {
+    "count": 5,
+    "label": "Penobscot County"
+  },
+  "State House|28": {
+    "count": 8,
+    "label": "Penobscot County"
+  },
+  "State House|29": {
+    "count": 7,
+    "label": "Penobscot County"
+  },
+  "State House|3": {
+    "count": 10,
+    "label": "Aroostook County"
+  },
+  "State House|30": {
+    "count": 15,
+    "label": "Piscataquis and Somerset counties"
+  },
+  "State House|31": {
+    "count": 5,
+    "label": "Piscataquis County"
+  },
+  "State House|32": {
+    "count": 6,
+    "label": "Penobscot County"
+  },
+  "State House|33": {
+    "count": 5,
+    "label": "Penobscot County"
+  },
+  "State House|34": {
+    "count": 3,
+    "label": "Glenburn, Kenduskeag, Levant"
+  },
+  "State House|35": {
+    "count": 2,
+    "label": "Carmel, Hermon"
+  },
+  "State House|36": {
+    "count": 2,
+    "label": "Hampden, Newburgh"
+  },
+  "State House|37": {
+    "count": 5,
+    "label": "Waldo County"
+  },
+  "State House|38": {
+    "count": 9,
+    "label": "Waldo County"
+  },
+  "State House|39": {
+    "count": 3,
+    "label": "Belfast, Belmont, Northport"
+  },
+  "State House|4": {
+    "count": 3,
+    "label": "Caribou, Wade, Washburn"
+  },
+  "State House|40": {
+    "count": 7,
+    "label": "Knox and Waldo counties"
+  },
+  "State House|41": {
+    "count": 2,
+    "label": "Camden, Rockport"
+  },
+  "State House|42": {
+    "count": 4,
+    "label": "Knox County"
+  },
+  "State House|43": {
+    "count": 5,
+    "label": "Knox County"
+  },
+  "State House|44": {
+    "count": 3,
+    "label": "Hope, Union, Warren"
+  },
+  "State House|45": {
+    "count": 4,
+    "label": "Lincoln and Knox counties"
+  },
+  "State House|46": {
+    "count": 5,
+    "label": "Lincoln County"
+  },
+  "State House|47": {
+    "count": 4,
+    "label": "Lincoln County"
+  },
+  "State House|48": {
+    "count": 6,
+    "label": "Lincoln County"
+  },
+  "State House|49": {
+    "count": 5,
+    "label": "Sagadahoc County"
+  },
+  "State House|5": {
+    "count": 1,
+    "label": "Part of Presque Isle"
+  },
+  "State House|50": {
+    "count": 1,
+    "label": "Part of Bath"
+  },
+  "State House|51": {
+    "count": 1,
+    "label": "Part of Topsham"
+  },
+  "State House|52": {
+    "count": 3,
+    "label": "Bowdoin, Bowdoinham, Richmond"
+  },
+  "State House|53": {
+    "count": 4,
+    "label": "Kennebec and Lincoln counties"
+  },
+  "State House|54": {
+    "count": 2,
+    "label": "Farmingdale, Gardiner"
+  },
+  "State House|55": {
+    "count": 3,
+    "label": "Hallowell, Manchester, West Gardiner"
+  },
+  "State House|56": {
+    "count": 3,
+    "label": "Litchfield, Monmouth, Wales"
+  },
+  "State House|57": {
+    "count": 2,
+    "label": "Readfield, Winthrop"
+  },
+  "State House|58": {
+    "count": 6,
+    "label": "Kennebec and Franklin counties"
+  },
+  "State House|59": {
+    "count": 1,
+    "label": "Part of Augusta"
+  },
+  "State House|6": {
+    "count": 15,
+    "label": "Aroostook County"
+  },
+  "State House|60": {
+    "count": 1,
+    "label": "Part of Augusta"
+  },
+  "State House|61": {
+    "count": 2,
+    "label": "Sidney, Vassalboro"
+  },
+  "State House|62": {
+    "count": 4,
+    "label": "Kennebec, Waldo and Lincoln counties"
+  },
+  "State House|63": {
+    "count": 3,
+    "label": "Albion, Freedom, Winslow"
+  },
+  "State House|64": {
+    "count": 2,
+    "label": "Waterville, Winslow"
+  },
+  "State House|65": {
+    "count": 1,
+    "label": "Part of Waterville"
+  },
+  "State House|66": {
+    "count": 5,
+    "label": "Somerset and Kennebec counties"
+  },
+  "State House|67": {
+    "count": 2,
+    "label": "Benton, Fairfield"
+  },
+  "State House|68": {
+    "count": 4,
+    "label": "Waldo, Kennebec and Somerset counties"
+  },
+  "State House|69": {
+    "count": 5,
+    "label": "Somerset County"
+  },
+  "State House|7": {
+    "count": 5,
+    "label": "Aroostook County"
+  },
+  "State House|70": {
+    "count": 1,
+    "label": "Part of Skowhegan"
+  },
+  "State House|71": {
+    "count": 3,
+    "label": "Cornville, Madison, Norridgewock"
+  },
+  "State House|72": {
+    "count": 10,
+    "label": "Somerset County"
+  },
+  "State House|73": {
+    "count": 21,
+    "label": "Oxford, Franklin and Somerset counties"
+  },
+  "State House|74": {
+    "count": 9,
+    "label": "Franklin and Somerset counties"
+  },
+  "State House|75": {
+    "count": 2,
+    "label": "Chesterville, Farmington"
+  },
+  "State House|76": {
+    "count": 3,
+    "label": "Jay, Livermore, Livermore Falls"
+  },
+  "State House|77": {
+    "count": 6,
+    "label": "Oxford and Androscoggin counties"
+  },
+  "State House|78": {
+    "count": 5,
+    "label": "Oxford County"
+  },
+  "State House|79": {
+    "count": 4,
+    "label": "Oxford County"
+  },
+  "State House|8": {
+    "count": 25,
+    "label": "Aroostook, Penobscot and Washington counties"
+  },
+  "State House|80": {
+    "count": 4,
+    "label": "Oxford County"
+  },
+  "State House|81": {
+    "count": 6,
+    "label": "Oxford County"
+  },
+  "State House|82": {
+    "count": 5,
+    "label": "Oxford County"
+  },
+  "State House|83": {
+    "count": 3,
+    "label": "Bridgton, Denmark, Harrison"
+  },
+  "State House|84": {
+    "count": 4,
+    "label": "Cumberland County"
+  },
+  "State House|85": {
+    "count": 1,
+    "label": "Part of Standish"
+  },
+  "State House|86": {
+    "count": 4,
+    "label": "Cumberland and Androscoggin counties"
+  },
+  "State House|87": {
+    "count": 2,
+    "label": "Mechanic Falls, Poland"
+  },
+  "State House|88": {
+    "count": 1,
+    "label": "Part of Auburn"
+  },
+  "State House|89": {
+    "count": 1,
+    "label": "Part of Auburn"
+  },
+  "State House|9": {
+    "count": 10,
+    "label": "Washington County"
+  },
+  "State House|90": {
+    "count": 2,
+    "label": "Auburn, Minot"
+  },
+  "State House|91": {
+    "count": 3,
+    "label": "Leeds, Turner, Wayne"
+  },
+  "State House|92": {
+    "count": 2,
+    "label": "Greene, Sabattus"
+  },
+  "State House|93": {
+    "count": 1,
+    "label": "Part of Lewiston"
+  },
+  "State House|94": {
+    "count": 1,
+    "label": "Part of Lewiston"
+  },
+  "State House|95": {
+    "count": 1,
+    "label": "Part of Lewiston"
+  },
+  "State House|96": {
+    "count": 1,
+    "label": "Part of Lewiston"
+  },
+  "State House|97": {
+    "count": 1,
+    "label": "Part of Lisbon"
+  },
+  "State House|98": {
+    "count": 5,
+    "label": "Sagadahoc, Androscoggin and Cumberland counties"
+  },
+  "State House|99": {
+    "count": 2,
+    "label": "Brunswick, Harpswell"
+  },
+  "State Senate|1": {
+    "count": 34,
+    "label": "Aroostook County"
+  },
+  "State Senate|10": {
+    "count": 12,
+    "label": "Penobscot and Hancock counties"
+  },
+  "State Senate|11": {
+    "count": 26,
+    "label": "Waldo County"
+  },
+  "State Senate|12": {
+    "count": 16,
+    "label": "Knox County"
+  },
+  "State Senate|13": {
+    "count": 20,
+    "label": "Lincoln, Knox and Kennebec counties"
+  },
+  "State Senate|14": {
+    "count": 12,
+    "label": "Kennebec County"
+  },
+  "State Senate|15": {
+    "count": 6,
+    "label": "Kennebec County"
+  },
+  "State Senate|16": {
+    "count": 5,
+    "label": "Kennebec and Somerset counties"
+  },
+  "State Senate|17": {
+    "count": 10,
+    "label": "Kennebec and Androscoggin counties"
+  },
+  "State Senate|18": {
+    "count": 14,
+    "label": "Cumberland, Oxford and Androscoggin counties"
+  },
+  "State Senate|19": {
+    "count": 36,
+    "label": "Oxford and Franklin counties"
+  },
+  "State Senate|2": {
+    "count": 42,
+    "label": "Aroostook and Penobscot counties"
+  },
+  "State Senate|20": {
+    "count": 4,
+    "label": "Androscoggin and Cumberland counties"
+  },
+  "State Senate|21": {
+    "count": 1,
+    "label": "Part of Lewiston"
+  },
+  "State Senate|22": {
+    "count": 13,
+    "label": "York, Cumberland and Oxford counties"
+  },
+  "State Senate|23": {
+    "count": 6,
+    "label": "Cumberland County"
+  },
+  "State Senate|24": {
+    "count": 11,
+    "label": "Sagadahoc and Lincoln counties"
+  },
+  "State Senate|25": {
+    "count": 6,
+    "label": "Cumberland County"
+  },
+  "State Senate|26": {
+    "count": 5,
+    "label": "Cumberland County"
+  },
+  "State Senate|27": {
+    "count": 2,
+    "label": "Portland, Westbrook"
+  },
+  "State Senate|28": {
+    "count": 2,
+    "label": "Long Island, Portland"
+  },
+  "State Senate|29": {
+    "count": 3,
+    "label": "Cape Elizabeth, Scarborough, South Portland"
+  },
+  "State Senate|3": {
+    "count": 14,
+    "label": "Kennebec, Somerset and Penobscot counties"
+  },
+  "State Senate|30": {
+    "count": 2,
+    "label": "Gorham, Scarborough"
+  },
+  "State Senate|31": {
+    "count": 3,
+    "label": "Buxton, Old Orchard Beach, Saco"
+  },
+  "State Senate|32": {
+    "count": 5,
+    "label": "York County"
+  },
+  "State Senate|33": {
+    "count": 4,
+    "label": "York County"
+  },
+  "State Senate|34": {
+    "count": 5,
+    "label": "York County"
+  },
+  "State Senate|35": {
+    "count": 5,
+    "label": "York County"
+  },
+  "State Senate|4": {
+    "count": 29,
+    "label": "Piscataquis and Penobscot counties"
+  },
+  "State Senate|5": {
+    "count": 36,
+    "label": "Somerset, Franklin and Kennebec counties"
+  },
+  "State Senate|6": {
+    "count": 59,
+    "label": "Washington and Hancock counties"
+  },
+  "State Senate|7": {
+    "count": 22,
+    "label": "Hancock and Knox counties"
+  },
+  "State Senate|8": {
+    "count": 21,
+    "label": "Penobscot County"
+  },
+  "State Senate|9": {
+    "count": 2,
+    "label": "Bangor, Hermon"
+  }
+}

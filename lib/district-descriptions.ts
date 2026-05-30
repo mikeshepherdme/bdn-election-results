@@ -1,18 +1,27 @@
 import fs from 'fs'
 import path from 'path'
 
-// Slim pre-built lookup: "State Senate|21" -> "Town1, Town2, ..."
-const lookup: Record<string, string> = (() => {
+type DistrictEntry = { count: number; label: string }
+
+const lookup: Record<string, DistrictEntry> = (() => {
   try {
-    const filePath = path.join(process.cwd(), 'data', 'district-towns.json')
-    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, string>
+    const filePath = path.join(process.cwd(), 'data', 'district-short-desc.json')
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8')) as Record<string, DistrictEntry>
   } catch {
     return {}
   }
 })()
 
+function key(office: string, district: string | number | null): string {
+  return `${office}|${district}`
+}
+
 export function getDistrictDescription(office: string, district: string | number | null): string | null {
   if (district == null) return null
-  const key = `${office}|${district}`
-  return lookup[key] ?? null
+  return lookup[key(office, district)]?.label ?? null
+}
+
+export function getDistrictTownCount(office: string, district: string | number | null): number | null {
+  if (district == null) return null
+  return lookup[key(office, district)]?.count ?? null
 }
