@@ -39,6 +39,7 @@ Each embed polls its Vercel API endpoint every 30 seconds and re-renders without
 | Hosting — API | Vercel (`bdn-election-results.vercel.app`) |
 | Hosting — Embeds | GitHub Pages (`mikeshepherdme.github.io/bdn-election-embeds`) |
 | Data source | Decision Desk HQ REST API v4 |
+| Ticker storage | Vercel KV (Upstash Redis) — keys: `events:{slug}` |
 
 ---
 
@@ -52,9 +53,11 @@ Set in Vercel → Project → Settings → Environment Variables. Locally, copy 
 | `DDHQ_CLIENT_ID` | Yes | DDHQ OAuth2 client ID |
 | `DDHQ_CLIENT_SECRET` | Yes | DDHQ OAuth2 client secret |
 | `DDHQ_RACE_DATE` | No | Defaults to `2026-06-09` |
-| `UPDATE_PASSWORD` | Recommended | Password for the manual live-update editor. If unset, the endpoint accepts any request. |
+| `UPDATE_PASSWORD` | **Set before election night** | Password for the manual live-update ticker editor. If unset, the endpoint accepts any request. |
+| `KV_REST_API_URL` | Yes (auto-set) | Injected automatically by Vercel when Upstash KV is connected |
+| `KV_REST_API_TOKEN` | Yes (auto-set) | Injected automatically by Vercel when Upstash KV is connected |
 
-`.env.local` is git-ignored and must never be committed.
+`DDHQ_API_BASE`, `DDHQ_CLIENT_ID`, and `DDHQ_CLIENT_SECRET` are set in Vercel production. KV vars are set automatically by the Upstash integration. `.env.local` is git-ignored and must never be committed.
 
 If `DDHQ_CLIENT_ID` or `DDHQ_CLIENT_SECRET` are missing, `isConfigured()` in `lib/ddhq.ts` returns `false` and all routes fall back to local mock data from `lib/mock-data.ts`.
 
@@ -127,7 +130,7 @@ Used by the town lookup embed. `/api/towns` returns all town names for autocompl
 ### `POST /api/race/[slug]/events`
 ### `DELETE /api/race/[slug]/events`
 
-Manual live-update ticker. Events stored in `data/race-events.json` keyed by slug.
+Manual live-update ticker. Events stored in **Vercel KV (Upstash Redis)** under the key `events:{slug}`. Falls back to an in-memory store for local development when `KV_REST_API_URL` is not set.
 
 **POST** body:
 
@@ -140,11 +143,9 @@ Manual live-update ticker. Events stored in `data/race-events.json` keyed by slu
 
 Requires `Authorization: Bearer {UPDATE_PASSWORD}` if the env var is set.
 
-**⚠️ Filesystem warning:** `data/race-events.json` is written with `writeFileSync`. Vercel's serverless runtime has a read-only project directory — these writes will fail silently in production. Before election night, migrate event storage to Vercel KV (Redis) or a Postgres table. This is the only part of the stack that is not production-ready as-is.
-
 ### `POST /api/race/[slug]/auto-updates`
 
-Called automatically by each single-race embed after every poll cycle. Checks current race state and appends new events to `data/race-events.json` for any thresholds not yet crossed (`condition_key` provides idempotency).
+Called automatically by each single-race embed after every poll cycle. Checks current race state and appends new events to Vercel KV for any thresholds not yet crossed (`condition_key` provides idempotency).
 
 Auto-events generated:
 
@@ -162,6 +163,10 @@ Auto-updates only run on `State/District` and `Federal` level races.
 ## The embeds (`bdn-election-embeds` repo)
 
 Static HTML files, no framework. Hosted at `https://mikeshepherdme.github.io/bdn-election-embeds/`. Each file is self-contained and iframeable.
+
+### Homepage topper (1)
+
+`bdn-election-topper.html` — 1280×150px live banner showing leaders and vote share for the four key races (Gov Dem, Gov Rep, U.S. Senate Dem, CD-2 Dem) with a "Live results & analysis" button. Embed as an iframe on the BDN homepage. Preview with mock data: `bdn-election-topper-preview.html`.
 
 ### Single-race embeds (5)
 
@@ -243,22 +248,28 @@ To delete an entry: open the form with the same shortcut, then click **✕** nex
 | `app/api/race/[slug]/auto-updates/route.ts` | Auto-event generation |
 | `app/api/town/[name]/route.ts` | Town results endpoint |
 | `app/api/towns/route.ts` | Town name list |
-| `data/race-events.json` | Ticker event store (migrate before election night) |
+| Vercel KV (`events:{slug}`) | Ticker event store — persistent across serverless instances |
 
 ---
 
 ## Election night checklist
 
-- [ ] Confirm `DDHQ_CLIENT_ID`, `DDHQ_CLIENT_SECRET`, `DDHQ_API_BASE` are set in Vercel production
-- [ ] Set a strong `UPDATE_PASSWORD` in Vercel
-- [ ] **Migrate event storage** from `data/race-events.json` to Vercel KV or Postgres — flat-file writes do not persist on Vercel serverless
-- [ ] Test `/api/races?office=State+Senate&party=Democratic` returns live DDHQ JSON the evening before
-- [ ] Test `/api/race/governor-democratic-primary` returns full race data with candidates
-- [ ] Test the town lookup with a known Maine town name
-- [ ] Confirm latest embed commit is deployed on GitHub Pages
-- [ ] Open each embed, verify pre-election state (0% bars, correct candidate names)
-- [ ] Test Ctrl+Cmd+W O W shortcut — post a test note, confirm it appears, then delete it
-- [ ] Verify auto-updates fire: hit `POST /api/race/governor-democratic-primary/auto-updates` and confirm no server errors
+**Already done (as of June 4, 2026):**
+- [x] `DDHQ_CLIENT_ID`, `DDHQ_CLIENT_SECRET`, `DDHQ_API_BASE` set in Vercel production — app is live and pulling from DDHQ
+- [x] Ticker storage migrated from filesystem to Vercel KV (Upstash Redis)
+- [x] Upstash KV connected — `KV_REST_API_URL` / `KV_REST_API_TOKEN` auto-injected
+- [x] 612 races in seed data (504 original + 108 local/school races added from DDHQ)
+- [x] iframeResizer added to all 12 embeds — no more white space below iframes
+
+**Still to do before June 9:**
+- [ ] Set a strong `UPDATE_PASSWORD` in Vercel → Environment Variables → redeploy
+- [ ] Replace iframe codes on bangordailynews.com/maine-election-results/ with updated snippets from `iframe-codes.html` (picks up iframeResizer auto-height fix)
+- [ ] Add homepage topper iframe to BDN homepage
+- [ ] Evening of June 8 — test `/api/race/governor-democratic-primary` returns full race data with correct candidates
+- [ ] Evening of June 8 — test town lookup: `/api/town/Portland` should return 20+ races
+- [ ] Evening of June 8 — test ticker: Ctrl+Cmd+W O W shortcut → post a test note → confirm it appears → delete it
+- [ ] Evening of June 8 — open each embed and confirm correct candidate names and "Awaiting results" state
+- [ ] June 9 at 8pm — confirm results start flowing (DDHQ marks `test_data: false` when polls close)
 
 ---
 
