@@ -34,9 +34,9 @@ export async function POST(
 ) {
   const { slug } = await params
   const race = getRace(slug)
-  if (!race) return NextResponse.json({ error: 'not found' }, { status: 404 })
+  if (!race) return NextResponse.json({ error: 'not found' }, { status: 404 }, { headers: { 'Access-Control-Allow-Origin': '*' } })
 
-  if (race.level === 'Universal') return NextResponse.json([])
+  if (race.level === 'Universal') return NextResponse.json([], { headers: { 'Access-Control-Allow-Origin': '*' } })
 
   const existing = await readSlug(slug)
   const usedKeys = new Set(existing.map(e => e.condition_key).filter(Boolean))
@@ -65,7 +65,7 @@ export async function POST(
     if (newEvents.length > 0) {
       await writeSlug(slug, [...existing, ...newEvents])
     }
-    return NextResponse.json(newEvents)
+    return NextResponse.json(newEvents, { headers: { 'Access-Control-Allow-Origin': '*' } })
   }
 
   const sorted = sortCandidates(race.candidates, votes)
@@ -156,5 +156,12 @@ export async function POST(
     await writeSlug(slug, [...existing, ...newEvents])
   }
 
-  return NextResponse.json(newEvents)
+  return NextResponse.json(newEvents, { headers: { 'Access-Control-Allow-Origin': '*' } })
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'POST, OPTIONS' },
+  })
 }
