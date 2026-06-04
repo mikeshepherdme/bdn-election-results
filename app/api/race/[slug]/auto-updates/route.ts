@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
-import { readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { kv } from '@vercel/kv'
 import { randomUUID } from 'crypto'
 import { getRace } from '@/lib/mock-data'
 import { flatVcus, sortCandidates, pctReporting, candidatePct } from '@/lib/types'
@@ -9,10 +8,18 @@ import type { RaceEvent } from '../events/route'
 
 export const dynamic = 'force-dynamic'
 
-const FILE = join(process.cwd(), 'data/race-events.json')
+// In-memory fallback for local dev (no KV configured)
+const memStore: Record<string, RaceEvent[]> = {}
+const useKV = !!process.env.KV_REST_API_URL
 
-function readAll(): Record<string, RaceEvent[]> {
-  try { return JSON.parse(readFileSync(FILE, 'utf-8')) } catch { return {} }
+async function readSlug(slug: string): Promise<RaceEvent[]> {
+  if (useKV) return (await kv.get<RaceEvent[]>(`events:${slug}`)) ?? []
+  return memStore[slug] ?? []
+}
+
+async function writeSlug(slug: string, events: RaceEvent[]): Promise<void> {
+  if (useKV) await kv.set(`events:${slug}`, events)
+  else memStore[slug] = events
 }
 
 function ordinal(n: number): string {
@@ -29,13 +36,10 @@ export async function POST(
   const race = getRace(slug)
   if (!race) return NextResponse.json({ error: 'not found' }, { status: 404 })
 
-  // Only generate auto-updates for state & federal races
   if (race.level === 'Universal') return NextResponse.json([])
 
-  const all = readAll()
-  const existing: RaceEvent[] = all[slug] ?? []
+  const existing = await readSlug(slug)
   const usedKeys = new Set(existing.map(e => e.condition_key).filter(Boolean))
-
   const newEvents: RaceEvent[] = []
 
   const votes = race.topline_results.votes
@@ -59,8 +63,7 @@ export async function POST(
 
   if (total === 0) {
     if (newEvents.length > 0) {
-      all[slug] = [...(all[slug] ?? []), ...newEvents]
-      writeFileSync(FILE, JSON.stringify(all, null, 2))
+      await writeSlug(slug, [...existing, ...newEvents])
     }
     return NextResponse.json(newEvents)
   }
@@ -122,36 +125,35 @@ export async function POST(
 
   // ── 3. Bellwether towns (Governor race only) ─────────────────────────────────
   if (race.office === 'Governor') {
-  const partyBellwethers = BELLWETHER_TOWNS[race.party] ?? []
-  const bellwetherSet = new Set(partyBellwethers)
-  const bellwetherRank = (name: string) => partyBellwethers.indexOf(name) + 1
+    const partyBellwethers = BELLWETHER_TOWNS[race.party] ?? []
+    const bellwetherSet = new Set(partyBellwethers)
+    const bellwetherRank = (name: string) => partyBellwethers.indexOf(name) + 1
 
-  for (const vcu of allVcus) {
-    if (!bellwetherSet.has(vcu.vcu)) continue
-    const townTotal = Object.values(vcu.votes).reduce((s, v) => s + v, 0)
-    if (townTotal === 0) continue
-    const key = `bellwether-${vcu.vcu}`
-    if (usedKeys.has(key)) continue
-    const townSorted = race.candidates
-      .map(c => ({ c, v: vcu.votes[String(c.cand_id)] ?? 0 }))
-      .sort((a, b) => b.v - a.v)
-    const townLeader = townSorted[0]
-    const townLeaderPct = ((townLeader.v / townTotal) * 100).toFixed(1)
-    const rank = bellwetherRank(vcu.vcu)
-    newEvents.push({
-      id: randomUUID(),
-      created_at: new Date().toISOString(),
-      category: 'ai',
-      condition_key: key,
-      text: `🔔 Bellwether: ${vcu.vcu} is in — the ${ordinal(rank)} of 20 towns that most closely mirrored 2018 primary results. ${townLeader.c.first_name} ${townLeader.c.last_name} leads with ${townLeaderPct}% of ${townTotal.toLocaleString()} votes cast.`,
-    })
-    usedKeys.add(key)
+    for (const vcu of allVcus) {
+      if (!bellwetherSet.has(vcu.vcu)) continue
+      const townTotal = Object.values(vcu.votes).reduce((s, v) => s + v, 0)
+      if (townTotal === 0) continue
+      const key = `bellwether-${vcu.vcu}`
+      if (usedKeys.has(key)) continue
+      const townSorted = race.candidates
+        .map(c => ({ c, v: vcu.votes[String(c.cand_id)] ?? 0 }))
+        .sort((a, b) => b.v - a.v)
+      const townLeader = townSorted[0]
+      const townLeaderPct = ((townLeader.v / townTotal) * 100).toFixed(1)
+      const rank = bellwetherRank(vcu.vcu)
+      newEvents.push({
+        id: randomUUID(),
+        created_at: new Date().toISOString(),
+        category: 'ai',
+        condition_key: key,
+        text: `🔔 Bellwether: ${vcu.vcu} is in — the ${ordinal(rank)} of 20 towns that most closely mirrored 2018 primary results. ${townLeader.c.first_name} ${townLeader.c.last_name} leads with ${townLeaderPct}% of ${townTotal.toLocaleString()} votes cast.`,
+      })
+      usedKeys.add(key)
+    }
   }
-  } // end Governor-only bellwether block
 
   if (newEvents.length > 0) {
-    all[slug] = [...(all[slug] ?? []), ...newEvents]
-    writeFileSync(FILE, JSON.stringify(all, null, 2))
+    await writeSlug(slug, [...existing, ...newEvents])
   }
 
   return NextResponse.json(newEvents)

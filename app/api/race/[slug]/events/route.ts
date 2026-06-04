@@ -1,11 +1,8 @@
 import { NextResponse } from 'next/server'
-import { readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { kv } from '@vercel/kv'
 import { randomUUID } from 'crypto'
 
 export const dynamic = 'force-dynamic'
-
-const FILE = join(process.cwd(), 'data/race-events.json')
 
 export type EventCategory = 'call' | 'milestone' | 'note' | 'ai' | 'story'
 
@@ -26,12 +23,18 @@ export interface RaceEvent {
   story_meta?: StoryMeta
 }
 
-function readAll(): Record<string, RaceEvent[]> {
-  try {
-    return JSON.parse(readFileSync(FILE, 'utf-8'))
-  } catch {
-    return {}
-  }
+// In-memory fallback for local dev (no KV configured)
+const memStore: Record<string, RaceEvent[]> = {}
+const useKV = !!process.env.KV_REST_API_URL
+
+async function readSlug(slug: string): Promise<RaceEvent[]> {
+  if (useKV) return (await kv.get<RaceEvent[]>(`events:${slug}`)) ?? []
+  return memStore[slug] ?? []
+}
+
+async function writeSlug(slug: string, events: RaceEvent[]): Promise<void> {
+  if (useKV) await kv.set(`events:${slug}`, events)
+  else memStore[slug] = events
 }
 
 async function fetchStoryMeta(url: string): Promise<StoryMeta> {
@@ -48,7 +51,7 @@ async function fetchStoryMeta(url: string): Promise<StoryMeta> {
     }
     const title = get('title') || html.match(/<title>([^<]+)<\/title>/i)?.[1] || url
     return {
-      title: title.replace(/\s*[|\-–—].*$/, '').trim(), // strip site name suffix
+      title: title.replace(/\s*[|\-–—].*$/, '').trim(),
       image: get('image') || undefined,
       description: get('description') || undefined,
     }
@@ -57,21 +60,22 @@ async function fetchStoryMeta(url: string): Promise<StoryMeta> {
   }
 }
 
+function checkAuth(req: Request): boolean {
+  const expected = process.env.UPDATE_PASSWORD
+  if (!expected) return true
+  const auth = req.headers.get('Authorization') ?? ''
+  return auth === `Bearer ${expected}`
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ slug: string }> }
 ) {
   const { slug } = await params
-  const all = readAll()
-  const events = (all[slug] ?? []).slice().reverse() // newest first
-  return NextResponse.json(events, { headers: { 'Cache-Control': 'no-store' } })
-}
-
-function checkAuth(req: Request): boolean {
-  const expected = process.env.UPDATE_PASSWORD
-  if (!expected) return true // no password set — open
-  const auth = req.headers.get('Authorization') ?? ''
-  return auth === `Bearer ${expected}`
+  const events = await readSlug(slug)
+  return NextResponse.json(events.slice().reverse(), {
+    headers: { 'Cache-Control': 'no-store', 'Access-Control-Allow-Origin': '*' },
+  })
 }
 
 export async function POST(
@@ -84,7 +88,6 @@ export async function POST(
   const { text, category = 'note', author, url } = body
 
   const isStory = category === 'story' && url?.trim()
-
   if (!isStory && !text?.trim()) {
     return NextResponse.json({ error: 'text required' }, { status: 400 })
   }
@@ -102,12 +105,14 @@ export async function POST(
     event.story_meta = await fetchStoryMeta(url.trim())
   }
 
-  const all = readAll()
-  if (!all[slug]) all[slug] = []
-  all[slug].push(event)
-  writeFileSync(FILE, JSON.stringify(all, null, 2))
+  const events = await readSlug(slug)
+  events.push(event)
+  await writeSlug(slug, events)
 
-  return NextResponse.json(event, { status: 201 })
+  return NextResponse.json(event, {
+    status: 201,
+    headers: { 'Access-Control-Allow-Origin': '*' },
+  })
 }
 
 export async function DELETE(
@@ -117,8 +122,7 @@ export async function DELETE(
   if (!checkAuth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { slug } = await params
   const { id } = await req.json()
-  const all = readAll()
-  if (all[slug]) all[slug] = all[slug].filter(e => e.id !== id)
-  writeFileSync(FILE, JSON.stringify(all, null, 2))
-  return NextResponse.json({ ok: true })
+  const events = await readSlug(slug)
+  await writeSlug(slug, events.filter(e => e.id !== id))
+  return NextResponse.json({ ok: true }, { headers: { 'Access-Control-Allow-Origin': '*' } })
 }
