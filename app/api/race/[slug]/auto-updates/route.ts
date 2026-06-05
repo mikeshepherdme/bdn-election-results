@@ -34,7 +34,7 @@ export async function POST(
 ) {
   const { slug } = await params
   const race = getRace(slug)
-  if (!race) return NextResponse.json({ error: 'not found' }, { status: 404 }, { headers: { 'Access-Control-Allow-Origin': '*' } })
+  if (!race) return NextResponse.json({ error: 'not found' }, { status: 404, headers: { 'Access-Control-Allow-Origin': '*' } })
 
   if (race.level === 'Universal') return NextResponse.json([], { headers: { 'Access-Control-Allow-Origin': '*' } })
 
