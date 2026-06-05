@@ -84,7 +84,9 @@ export async function POST(
 ) {
   if (!checkAuth(req)) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   const { slug } = await params
-  const body = await req.json()
+  // Accept both application/json and text/plain (text/plain avoids CORS preflight)
+  const raw = await req.text()
+  const body = JSON.parse(raw)
   const { text, category = 'note', author, url } = body
 
   const isStory = category === 'story' && url?.trim()
