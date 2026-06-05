@@ -126,3 +126,14 @@ export async function DELETE(
   await writeSlug(slug, events.filter(e => e.id !== id))
   return NextResponse.json({ ok: true }, { headers: { 'Access-Control-Allow-Origin': '*' } })
 }
+
+export async function OPTIONS() {
+  return new NextResponse(null, {
+    status: 204,
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    },
+  })
+}
