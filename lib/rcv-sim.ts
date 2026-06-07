@@ -125,10 +125,9 @@ export function runForecast(
   polling: RacePollingData,
   N = 10_000
 ): RCVForecastResult {
-  // ── Candidate set: only those present in both race and poll ────────────────
-  const pollCands = polling.candidates.filter(pc =>
-    race.candidates.some(rc => rc.cand_id === pc.candId)
-  )
+  // Use the full polling candidate list — actual votes default to 0 for any
+  // not yet present in DDHQ data, which is correct pre-results.
+  const pollCands = polling.candidates
 
   // ── Poll first-choice shares, decided only ─────────────────────────────────
   const decidedPct = 100 - polling.undecidedPct
