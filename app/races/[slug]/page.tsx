@@ -8,6 +8,13 @@ import RaceResults from '@/components/RaceResults'
 import RaceMapSidebar from '@/components/RaceMapSidebar'
 import RaceMunicipalityView from '@/components/RaceMunicipalityView'
 import RCVBadge from '@/components/RCVBadge'
+import RCVForecast from '@/components/RCVForecast'
+
+const RCV_FORECAST_SLUGS = new Set([
+  'governor-democratic-primary',
+  'governor-republican-primary',
+  'us-house-district-2-democratic-primary',
+])
 
 function districtGeo(race: Race): string | null {
   if (!race.district) return null
@@ -124,11 +131,14 @@ export default async function RacePage({ params }: Props) {
     </>
   )
 
+  const showForecast = RCV_FORECAST_SLUGS.has(slug)
+
   if (isLegislative) {
     return (
       <>
         {header}
         <RaceResults initialRace={race} partyColor={partyColor} partyLabel={partyLabel} />
+        {showForecast && <RCVForecast raceSlug={slug} partyColor={partyColor} />}
         <div style={{ marginTop: '48px' }}>
           <RaceMunicipalityView initialRace={race} showAllTowns={showAllTowns} />
         </div>
@@ -142,6 +152,7 @@ export default async function RacePage({ params }: Props) {
         <div className="race-page-main">
           {header}
           <RaceResults initialRace={race} partyColor={partyColor} partyLabel={partyLabel} />
+          {showForecast && <RCVForecast raceSlug={slug} partyColor={partyColor} />}
         </div>
         <div className="race-page-sidebar">
           <RaceMapSidebar initialRace={race} />
