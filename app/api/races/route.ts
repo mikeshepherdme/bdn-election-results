@@ -59,7 +59,7 @@ export async function GET(req: Request) {
 
   return NextResponse.json(results, {
     headers: {
-      'Cache-Control': 'no-store',
+      'Cache-Control': 's-maxage=30, stale-while-revalidate=60',
       'Access-Control-Allow-Origin': '*',
     },
   })
