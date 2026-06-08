@@ -15,7 +15,7 @@
 
 import type { Race } from '@/lib/types'
 import type { RacePollingData } from '@/lib/polling-data'
-import { COUNTY_LEANS } from '@/lib/county-leans'
+import { TOWN_SIMILARITY } from '@/lib/town-similarity'
 
 // ── PRNG ──────────────────────────────────────────────────────────────────────
 
@@ -255,49 +255,85 @@ export interface RCVForecastResult {
 
 // ── Main entry point ──────────────────────────────────────────────────────────
 
-// Compute geographic-adjusted expected first-choice shares for remaining votes.
-// Uses county lean multipliers + DDHQ county reporting to identify which counties
-// haven't reported yet and what candidate distribution they're likely to show.
-function computeGeoShares(
+// Estimate expected first-choice shares for votes that haven't been reported yet.
+//
+// Algorithm:
+//   For each unreported town (VCU), look up its top-15 most similar towns from
+//   the 2018 GOP primary similarity table.  Among those, find the ones that have
+//   already reported in 2026.  Blend their observed first-choice distributions —
+//   weighted by both similarity score and reported town size — to estimate how
+//   the unreported town will vote.  Fall back to county-level actuals (if the
+//   county has any results) or the statewide poll prior (if nothing has reported).
+//
+//   Returns null before any results are in (pre-election), so the forecast falls
+//   back to the pure poll Dirichlet.
+function computeRemainingShares(
   race: Race,
   candIds: number[],
-  pollShares: number[],
-  fallbackWeights: Record<string, number>,
-  leans: Record<string, Record<number, number>>
+  pollShares: number[]
 ): number[] | null {
+  if (race.topline_results.total_votes === 0) return null
+
+  // Index reported towns: UPPER_CASE name → [share per candidate, total votes]
+  const reported = new Map<string, { shares: number[]; total: number }>()
+  for (const county of race.counties) {
+    for (const vcu of county.vcus) {
+      const total = Object.values(vcu.votes).reduce((s, v) => s + v, 0)
+      if (total === 0) continue
+      reported.set(vcu.vcu.toUpperCase(), {
+        shares: candIds.map(id => (vcu.votes[String(id)] ?? 0) / total),
+        total,
+      })
+    }
+  }
+  if (reported.size === 0) return null
+
   const weighted = new Array(candIds.length).fill(0)
   let totalWeight = 0
 
-  // Build list of county sources: prefer DDHQ data, fall back to 2018 proxy weights
-  const hasDDHQCounties = race.counties.length > 0
-  const sources: Array<{ name: string; remaining: number }> = []
+  for (const county of race.counties) {
+    // County-level fallback: observed distribution so far in this county
+    const countyReported = Object.values(county.votes).reduce((s, v) => s + v, 0)
+    const countyShares = countyReported > 0
+      ? candIds.map(id => (county.votes[String(id)] ?? 0) / countyReported)
+      : pollShares
 
-  if (hasDDHQCounties) {
-    for (const county of race.counties) {
-      const reported = Object.values(county.votes).reduce((s, v) => s + v, 0)
-      const estimated = county.estimated_votes?.turnout_mid ?? 0
-      const remaining = Math.max(0, estimated - reported)
-      if (remaining > 0) sources.push({ name: county.county, remaining })
-    }
-  } else {
-    // Pre-election: no county data yet — use all county weights as remaining
-    for (const [name, wt] of Object.entries(fallbackWeights)) {
-      sources.push({ name, remaining: wt })
+    for (const vcu of county.vcus) {
+      const actual = Object.values(vcu.votes).reduce((s, v) => s + v, 0)
+      if (actual > 0) continue  // already reported — not in the remaining pile
+
+      const estVotes = vcu.estimated_votes?.turnout_mid ?? 0
+      if (estVotes <= 0) continue
+
+      // Find similar towns that have reported, from the 2018 similarity table
+      const neighbors = TOWN_SIMILARITY[vcu.vcu.toUpperCase()] ?? []
+      const reportedNeighbors = neighbors.filter(([t]) => reported.has(t))
+
+      let estShares: number[]
+      if (reportedNeighbors.length === 0) {
+        // No similar towns have reported — fall back to county or poll
+        estShares = countyShares
+      } else {
+        // Weighted blend: similarity × sqrt(reported-town-size) normalised
+        const blend = new Array(candIds.length).fill(0)
+        let wSum = 0
+        for (const [town, sim] of reportedNeighbors) {
+          const r = reported.get(town)!
+          const w = sim * Math.sqrt(r.total)  // up-weight larger reported towns
+          r.shares.forEach((s, i) => { blend[i] += w * s })
+          wSum += w
+        }
+        estShares = blend.map(v => v / wSum)
+      }
+
+      for (let i = 0; i < candIds.length; i++) {
+        weighted[i] += estVotes * estShares[i]
+      }
+      totalWeight += estVotes
     }
   }
 
-  for (const { name, remaining } of sources) {
-    const lean = leans[name]
-    const raw = candIds.map((id, i) => pollShares[i] * (lean?.[id] ?? 1.0))
-    const rawSum = raw.reduce((s, v) => s + v, 0)
-    if (rawSum <= 0) continue
-    for (let i = 0; i < candIds.length; i++) {
-      weighted[i] += remaining * (raw[i] / rawSum)
-    }
-    totalWeight += remaining
-  }
-
-  if (totalWeight <= 0) return null
+  if (totalWeight === 0) return null
   return weighted.map(v => v / totalWeight)
 }
 
@@ -331,27 +367,26 @@ export function runForecast(
     ? Math.min(100, Math.round((actualTotal / totalEstimated) * 100))
     : 0
 
-  // ── Geographic prior for remaining votes ──────────────────────────────────
-  // Use county lean multipliers to compute expected first-choice distribution
-  // for precincts that haven't reported yet.  As actual votes accumulate the
-  // geographic signal is reinforced and eventually dominated by real results.
-  const geoData = COUNTY_LEANS[race.slug]
-  const geoShares = geoData && Object.keys(geoData.leans).length > 0
-    ? computeGeoShares(race, candIds, pollShares, geoData.weights, geoData.leans)
-    : null
-
-  // Dirichlet prior for remaining votes blends poll + geographic expectations.
-  // Each alpha starts from the scaled poll prior; actual votes are added as
-  // Bayesian evidence (Dirichlet-Multinomial conjugate update); and the
-  // geographic prior adds soft evidence about which candidates the unreported
-  // precincts are likely to favor.
+  // ── Dirichlet alphas for remaining votes ─────────────────────────────────
+  //
+  // Pre-election (0 votes reported): pure poll prior (ALPHA_SCALE reduces the
+  // nominal n to reflect real-world forecast uncertainty beyond sampling error).
+  //
+  // Election night: two layers of evidence are added:
+  //   1. Actual votes — Bayesian conjugate update (alpha += actual_votes[cand]).
+  //      Each real vote directly narrows the remaining-vote distribution.
+  //   2. Town-correlation estimate — computeRemainingShares() uses reported
+  //      towns' observed distributions + 2018 town-similarity data to predict
+  //      unreported towns.  Treated as GEO_SIGNAL "equivalent votes" of soft
+  //      evidence about the remaining pile.
   const nDecided = polling.sampleSize * (decidedPct / 100) * ALPHA_SCALE
-  const GEO_EVIDENCE = 150  // "equivalent votes" of geographic signal weight
+  const remainingShares = computeRemainingShares(race, candIds, pollShares)
+  const GEO_SIGNAL = 200  // equivalent-vote weight for town-correlation signal
   const alphas = candIds.map((id, i) => {
-    const pollAlpha  = Math.max(pollShares[i] * nDecided, 0.5)
+    const pollAlpha   = Math.max(pollShares[i] * nDecided, 0.5)
     const actualBoost = actualVotes[id]
-    const geoBoost   = geoShares ? geoShares[i] * GEO_EVIDENCE : 0
-    return pollAlpha + actualBoost + geoBoost
+    const corrBoost   = remainingShares ? remainingShares[i] * GEO_SIGNAL : 0
+    return pollAlpha + actualBoost + corrBoost
   })
 
   // ── Pre-build ballot templates (fixed across simulations) ─────────────────
