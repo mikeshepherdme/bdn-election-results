@@ -14,15 +14,19 @@ export interface RacePollingData {
   sampleSize: number
   undecidedPct: number
   candidates: CandidatePollEntry[]
-  // All deeper-choice tables keyed by the PREVIOUS choice:
-  //   secondChoice[from1stId][to2ndId]   = raw % (Q8 / Q13 / Q31, by 1st-choice column)
-  //   thirdChoice[from2ndId][to3rdId]    = raw % (Q9  / Q14 / Q32, by 2nd-choice column)
-  //   fourthChoice[from3rdId][to4thId]   = raw % (Q10 / Q15,       by 3rd-choice column)
-  //   fifthChoice[from4thId][to5thId]    = raw % (Q11,             by 4th-choice column) — GOP only
-  // Diagonal (self-referential) cells in the original cross-tabs are impossible; encoded as 0.
-  // ** (insufficient n) cells use the "All" column as a proxy; encoded and labelled below.
-  // Normalization (excluding undecided / don't-rank rows, filtering already-ranked candidates)
-  // happens at simulation time.
+  // All tables keyed by the PREVIOUS choice:
+  //   secondChoice[from1st][to2nd]  (Q8/Q13/Q31, by 1st-choice column)
+  //   thirdChoice[from2nd][to3rd]   (Q9/Q14/Q32, by 2nd-choice column)
+  //   fourthChoice[from3rd][to4th]  (Q10/Q15,    by 3rd-choice column)
+  //   fifthChoice[from4th][to5th]   (Q11,         by 4th-choice column, GOP only)
+  //
+  // IMPORTANT: self-referential diagonal values ARE preserved as encoded
+  // (e.g. "Bellows 3rd among Bellows-2nd voters" = 18%).  They are non-zero
+  // because the cross-tab mixes all first-choice types.  The simulation filters
+  // already-ranked candidates from the actual next-preference selection, but uses
+  // the full row sum (including diagonals) to compute the exhaustion rate.
+  // Exhaust fraction = 1 – (sum of all encoded values) / 100, which equals
+  // the "undecided + do not plan to rank" rows in the original cross-tab.
   secondChoice:  Record<number, Record<number, number>>
   thirdChoice?:  Record<number, Record<number, number>>
   fourthChoice?: Record<number, Record<number, number>>
@@ -55,8 +59,8 @@ export const POLLING: Record<string, RacePollingData> = {
       { candId: 950906, name: 'Robert Wessels',   firstChoicePct: 2  },
     ],
 
-    // Q8 cross-tab "GOP 1st Choice" columns
-    // Jones/Libby/Wessels 1st-choice cols all **: using Q8 "All" col as proxy
+    // Q8 "GOP 1st Choice" columns. No diagonal possible (2nd ≠ 1st by design).
+    // Jones/Libby/Wessels 1st-choice cols all **: Q8 "All" col used as proxy.
     secondChoice: {
       950899: { 950900:  9, 950901: 2, 950902: 6, 950903: 24, 950904:  4, 950905: 11, 950906: 1 },
       950900: { 950899: 14, 950901: 5, 950902: 1, 950903: 11, 950904:  2, 950905: 10, 950906: 0 },
@@ -68,45 +72,44 @@ export const POLLING: Record<string, RacePollingData> = {
       950906: { 950899: 15, 950900:10, 950901: 5, 950902:  4, 950903: 12, 950904:  3, 950905:10 }, // proxy
     },
 
-    // Q9 cross-tab "GOP 2nd Choice" columns
-    // Bush-2nd col all **: using Q9 "All" col  (Bush 18, Charles 9, Jones 10, Mason 14, McCarthy 6, Midgley 8, Wessels 2)
+    // Q9 "GOP 2nd Choice" columns. Diagonals kept as encoded (see note above).
+    // Bush-2nd col all **: Q9 "All" col proxy (Bush:18,Charles:9,Jones:10,Libby:4,Mason:14,McCarthy:6,Midgley:8,Wessels:2)
     // Midgley-2nd col all **: same proxy
-    // Self-referential diagonals set to 0
     thirdChoice: {
-      950899: { 950900: 9, 950901:10, 950902: 4, 950903:14, 950904: 6, 950905: 8, 950906: 2 }, // proxy (Bush 2nd → All col)
-      950900: { 950899: 0, 950901: 8, 950902: 8, 950903:21, 950904: 8, 950905: 2, 950906: 4 }, // Charles 2nd
-      950901: { 950899:24, 950900: 0, 950902: 0, 950903:13, 950904: 8, 950905: 2, 950906: 0 }, // Jones 2nd
-      950902: { 950899:25, 950900:21, 950901: 0, 950903:12, 950904: 2, 950905:18, 950906: 4 }, // Libby 2nd
-      950903: { 950899:34, 950900: 0, 950901: 9, 950902: 0, 950904: 2, 950905: 0, 950906: 7 }, // Mason 2nd
-      950904: { 950899: 7, 950900:13, 950901:23, 950902: 4, 950903: 0, 950905:18, 950906: 2 }, // McCarthy 2nd
-      950905: { 950899:18, 950900: 9, 950901:10, 950902: 4, 950903:14, 950904: 6, 950906: 2 }, // proxy (Midgley 2nd → All col)
-      950906: { 950899:39, 950900: 7, 950901: 5, 950902: 2, 950903:20, 950904: 7, 950905: 0 }, // Wessels 2nd
+      950899: { 950899:18, 950900: 9, 950901:10, 950902: 4, 950903:14, 950904: 6, 950905: 8, 950906: 2 }, // proxy
+      950900: { 950899: 0, 950900:12, 950901: 8, 950902: 8, 950903:21, 950904: 8, 950905: 2, 950906: 4 },
+      950901: { 950899:24, 950900: 0, 950901: 9, 950902: 0, 950903:13, 950904: 8, 950905: 2, 950906: 0 },
+      950902: { 950899:25, 950900:21, 950901: 0, 950902:14, 950903:12, 950904: 2, 950905:18, 950906: 4 },
+      950903: { 950899:34, 950900: 0, 950901: 9, 950902: 0, 950903:29, 950904: 2, 950905: 0, 950906: 7 },
+      950904: { 950899: 7, 950900:13, 950901:23, 950902: 4, 950903: 0, 950904: 5, 950905:18, 950906: 2 },
+      950905: { 950899:18, 950900: 9, 950901:10, 950902: 4, 950903:14, 950904: 6, 950905: 8, 950906: 2 }, // proxy
+      950906: { 950899:39, 950900: 7, 950901: 5, 950902: 2, 950903:20, 950904: 7, 950905: 0, 950906: 0 },
     },
 
-    // Q10 cross-tab "GOP 3rd Choice" columns
-    // Bush-3rd col all **: using Q10 "All" col  (Bush 11, Charles 7, Jones 15, Libby 5, Mason 10, McCarthy 10, Midgley 7, Wessels 7)
+    // Q10 "GOP 3rd Choice" columns. Diagonals kept.
+    // Bush-3rd col all **: Q10 "All" col proxy (Bush:11,Charles:7,Jones:15,Libby:5,Mason:10,McCarthy:10,Midgley:7,Wessels:7)
     fourthChoice: {
-      950899: { 950900: 7, 950901:15, 950902: 5, 950903:10, 950904:10, 950905: 7, 950906: 7 }, // proxy (Bush 3rd → All col)
-      950900: { 950899: 0, 950901:11, 950902: 0, 950903:17, 950904:16, 950905: 5, 950906: 5 }, // Charles 3rd
-      950901: { 950899:16, 950900: 0, 950902: 4, 950903:10, 950904:19, 950905: 8, 950906: 3 }, // Jones 3rd
-      950902: { 950899:19, 950900:15, 950901: 0, 950903: 5, 950904: 0, 950905: 9, 950906:12 }, // Libby 3rd
-      950903: { 950899:27, 950900: 9, 950901:18, 950902: 0, 950904: 4, 950905: 0, 950906:10 }, // Mason 3rd
-      950904: { 950899:11, 950900: 0, 950901:35, 950902: 3, 950903: 0, 950905: 7, 950906: 0 }, // McCarthy 3rd
-      950905: { 950899: 5, 950900:12, 950901:21, 950902: 9, 950903: 8, 950904: 0, 950906:17 }, // Midgley 3rd
-      950906: { 950899:19, 950900: 5, 950901:10, 950902: 5, 950903:14, 950904: 4, 950905: 0 }, // Wessels 3rd
+      950899: { 950899:11, 950900: 7, 950901:15, 950902: 5, 950903:10, 950904:10, 950905: 7, 950906: 7 }, // proxy
+      950900: { 950899: 0, 950900:12, 950901:11, 950902: 0, 950903:17, 950904:16, 950905: 5, 950906: 5 },
+      950901: { 950899:16, 950900: 0, 950901: 5, 950902: 4, 950903:10, 950904:19, 950905: 8, 950906: 3 },
+      950902: { 950899:19, 950900:15, 950901: 0, 950902:20, 950903: 5, 950904: 0, 950905: 9, 950906:12 },
+      950903: { 950899:27, 950900: 9, 950901:18, 950902: 0, 950903:24, 950904: 4, 950905: 0, 950906:10 },
+      950904: { 950899:11, 950900: 0, 950901:35, 950902: 3, 950903: 0, 950904: 7, 950905: 7, 950906: 0 },
+      950905: { 950899: 5, 950900:12, 950901:21, 950902: 9, 950903: 8, 950904: 0, 950905:10, 950906:17 },
+      950906: { 950899:19, 950900: 5, 950901:10, 950902: 5, 950903:14, 950904: 4, 950905: 0, 950906:14 },
     },
 
-    // Q11 cross-tab "GOP 4th Choice" columns
-    // Bush-4th col all **: using Q11 "All" col  (Bush 6, Charles 6, Jones 12, Libby 10, Mason 9, McCarthy 14, Midgley 7, Wessels 16)
+    // Q11 "GOP 4th Choice" columns. Diagonals kept.
+    // Bush-4th col all **: Q11 "All" col proxy (Bush:6,Charles:6,Jones:12,Libby:10,Mason:9,McCarthy:14,Midgley:7,Wessels:16)
     fifthChoice: {
-      950899: { 950900: 6, 950901:12, 950902:10, 950903: 9, 950904:14, 950905: 7, 950906:16 }, // proxy
-      950900: { 950899: 0, 950901: 0, 950902:20, 950903: 0, 950904:15, 950905: 6, 950906: 7 }, // Charles 4th
-      950901: { 950899: 8, 950900: 0, 950902: 9, 950903:23, 950904:31, 950905: 8, 950906:10 }, // Jones 4th
-      950902: { 950899: 0, 950900:22, 950901: 0, 950903:10, 950904: 4, 950905: 6, 950906:23 }, // Libby 4th
-      950903: { 950899: 0, 950900: 0, 950901: 0, 950902: 0, 950904:11, 950905: 0, 950906:26 }, // Mason 4th
-      950904: { 950899: 0, 950900: 0, 950901:30, 950902: 0, 950903: 0, 950905: 5, 950906:30 }, // McCarthy 4th
-      950905: { 950899: 0, 950900: 0, 950901:39, 950902: 6, 950903: 3, 950904: 0, 950906:23 }, // Midgley 4th
-      950906: { 950899:11, 950900: 0, 950901:13, 950902: 6, 950903:29, 950904:22, 950905: 0 }, // Wessels 4th
+      950899: { 950899: 6, 950900: 6, 950901:12, 950902:10, 950903: 9, 950904:14, 950905: 7, 950906:16 }, // proxy
+      950900: { 950899: 0, 950900: 9, 950901: 0, 950902:20, 950903: 0, 950904:15, 950905: 6, 950906: 7 },
+      950901: { 950899: 8, 950900: 0, 950901:10, 950902: 9, 950903:23, 950904:31, 950905: 8, 950906:10 },
+      950902: { 950899: 0, 950900:22, 950901: 0, 950902:13, 950903:10, 950904: 4, 950905: 6, 950906:23 },
+      950903: { 950899: 0, 950900: 0, 950901: 0, 950902: 0, 950903:10, 950904:11, 950905: 0, 950906:26 },
+      950904: { 950899: 0, 950900: 0, 950901:30, 950902: 0, 950903: 0, 950904:20, 950905: 5, 950906:30 },
+      950905: { 950899: 0, 950900: 0, 950901:39, 950902: 6, 950903: 3, 950904: 0, 950905: 5, 950906:23 },
+      950906: { 950899:11, 950900: 0, 950901:13, 950902: 6, 950903:29, 950904:22, 950905: 0, 950906: 3 },
     },
 
     turnoutEstimate: 120_000,
@@ -126,33 +129,35 @@ export const POLLING: Record<string, RacePollingData> = {
       { candId: 950894, name: 'Nirav Shah',     firstChoicePct: 25 },
     ],
 
-    // Q13 cross-tab "Dem 1st Choice" columns
+    // Q13 "Dem 1st Choice" columns. No diagonal possible.
     secondChoice: {
-      950890: { 950891: 32, 950892: 10, 950893: 33, 950894: 18 }, // Bellows 1st
-      950891: { 950890: 48, 950892:  5, 950893: 23, 950894: 16 }, // Jackson 1st
-      950892: { 950890: 26, 950891: 11, 950893: 18, 950894: 18 }, // King 1st
-      950893: { 950890: 34, 950891: 15, 950892: 11, 950894: 28 }, // Pingree 1st
-      950894: { 950890: 25, 950891: 16, 950892: 23, 950893: 26 }, // Shah 1st
+      950890: { 950891: 32, 950892: 10, 950893: 33, 950894: 18 },
+      950891: { 950890: 48, 950892:  5, 950893: 23, 950894: 16 },
+      950892: { 950890: 26, 950891: 11, 950893: 18, 950894: 18 },
+      950893: { 950890: 34, 950891: 15, 950892: 11, 950894: 28 },
+      950894: { 950890: 25, 950891: 16, 950892: 23, 950893: 26 },
     },
 
-    // Q14 cross-tab "Dem 2nd Choice" columns
-    // Self-referential diagonals (e.g. Bellows 2nd → Bellows 3rd) set to 0
+    // Q14 "Dem 2nd Choice" columns. Diagonals kept (see note above).
+    // Row sum = 100% when undecided+don't-rank are included.
+    // Exhaust fraction = 1 – sum(encoded values)/100 ≈ undecided+don't-rank rows.
     thirdChoice: {
-      950890: { 950891: 11, 950892:  0, 950893: 40, 950894:  8 }, // Bellows 2nd
-      950891: { 950890:  0, 950892: 14, 950893: 47, 950894: 19 }, // Jackson 2nd
-      950892: { 950890: 36, 950891:  8, 950893: 25, 950894:  0 }, // King 2nd
-      950893: { 950890: 15, 950891:  0, 950892:  7, 950894: 26 }, // Pingree 2nd
-      950894: { 950890: 35, 950891: 10, 950892: 26, 950893:  0 }, // Shah 2nd
+      //                   Bellows Jackson  King  Pingree  Shah
+      950890: { 950890:18, 950891:11, 950892: 0, 950893:40, 950894: 8 }, // Bellows 2nd; exhaust≈23%
+      950891: { 950890: 0, 950891: 9, 950892:14, 950893:47, 950894:19 }, // Jackson 2nd; exhaust≈11%
+      950892: { 950890:36, 950891: 8, 950892:19, 950893:25, 950894: 0 }, // King 2nd;    exhaust≈12%
+      950893: { 950890:15, 950891: 0, 950892: 7, 950893:46, 950894:26 }, // Pingree 2nd; exhaust≈6%
+      950894: { 950890:35, 950891:10, 950892:26, 950893: 0, 950894:21 }, // Shah 2nd;    exhaust≈8%
     },
 
-    // Q15 cross-tab "Dem 3rd Choice" columns
-    // Self-referential diagonals set to 0
+    // Q15 "Dem 3rd Choice" columns. Diagonals kept.
     fourthChoice: {
-      950890: { 950891: 18, 950892:  0, 950893: 26, 950894:  9 }, // Bellows 3rd
-      950891: { 950890:  0, 950892: 28, 950893: 19, 950894: 12 }, // Jackson 3rd
-      950892: { 950890: 20, 950891: 17, 950893: 23, 950894:  0 }, // King 3rd
-      950893: { 950890: 27, 950891:  0, 950892: 16, 950894:  7 }, // Pingree 3rd
-      950894: { 950890: 19, 950891: 11, 950892: 20, 950893:  0 }, // Shah 3rd
+      //                   Bellows Jackson  King  Pingree  Shah
+      950890: { 950890:24, 950891:18, 950892: 0, 950893:26, 950894: 9 }, // Bellows 3rd; exhaust≈23%
+      950891: { 950890: 0, 950891:22, 950892:28, 950893:19, 950894:12 }, // Jackson 3rd; exhaust≈19%
+      950892: { 950890:20, 950891:17, 950892:25, 950893:23, 950894: 0 }, // King 3rd;    exhaust≈15%
+      950893: { 950890:27, 950891: 0, 950892:16, 950893:17, 950894: 7 }, // Pingree 3rd; exhaust≈33%
+      950894: { 950890:19, 950891:11, 950892:20, 950893: 0, 950894:21 }, // Shah 3rd;    exhaust≈29%
     },
 
     turnoutEstimate: 140_000,
@@ -171,21 +176,21 @@ export const POLLING: Record<string, RacePollingData> = {
       { candId: 950889, name: 'Jordan Wood',     firstChoicePct: 21 },
     ],
 
-    // Q31 cross-tab "CD-2 1st Choice" columns
+    // Q31 "CD-2 1st Choice" columns. No diagonal possible.
     secondChoice: {
-      950886: { 950887: 35, 950888:  3, 950889: 28 }, // Baldacci 1st
-      950887: { 950886: 52, 950888: 10, 950889: 25 }, // Dunlap 1st
-      950888: { 950886: 34, 950887: 15, 950889: 40 }, // Loud 1st
-      950889: { 950886: 33, 950887: 27, 950888: 14 }, // Wood 1st
+      950886: { 950887: 35, 950888:  3, 950889: 28 },
+      950887: { 950886: 52, 950888: 10, 950889: 25 },
+      950888: { 950886: 34, 950887: 15, 950889: 40 },
+      950889: { 950886: 33, 950887: 27, 950888: 14 },
     },
 
-    // Q32 cross-tab "CD-2 2nd Choice" columns
-    // Self-referential diagonals set to 0
+    // Q32 "CD-2 2nd Choice" columns. Diagonals kept.
     thirdChoice: {
-      950886: { 950887: 27, 950888:  9, 950889:  0 }, // Baldacci 2nd
-      950887: { 950886:  0, 950888: 13, 950889: 40 }, // Dunlap 2nd
-      950888: { 950886: 13, 950887:  0, 950889: 38 }, // Loud 2nd
-      950889: { 950886: 15, 950887: 24, 950888:  0 }, // Wood 2nd
+      //                     Baldacci  Dunlap   Loud   Wood
+      950886: { 950886:18, 950887:27, 950888: 9, 950889: 0 }, // Baldacci 2nd; exhaust≈46%
+      950887: { 950886: 0, 950887:14, 950888:13, 950889:40 }, // Dunlap 2nd;   exhaust≈33%
+      950888: { 950886:13, 950887: 0, 950888:10, 950889:38 }, // Loud 2nd;     exhaust≈39%
+      950889: { 950886:15, 950887:24, 950888: 0, 950889:31 }, // Wood 2nd;     exhaust≈30%
     },
 
     turnoutEstimate: 38_000,

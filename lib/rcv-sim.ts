@@ -71,6 +71,21 @@ function available(
     .filter(([id, w]) => !seen.has(id) && w > 0)
 }
 
+// Pre-election forecast uncertainty factors:
+//   ALPHA_SCALE: reduces the Dirichlet concentration below the poll's nominal n.
+//   A poll of n=484 gives sampling σ≈2%; real forecasts need σ≈4-5% to reflect
+//   turnout model error, house effects, and last-minute movement.  0.3 × 430 ≈ 130
+//   effective obs, σ≈4%, which is in line with Maine primary forecast practice.
+//   (Becomes less relevant as actual votes accumulate — Dirichlet only samples
+//   the unreported fraction.)
+//
+//   PREF_SMOOTH: blends each conditional preference distribution 15% toward
+//   uniform.  Cross-tab sub-samples can be as small as 30-50 respondents per
+//   cell, so raw percentages carry substantial noise; smoothing prevents the
+//   preference chain from being over-confident.
+const ALPHA_SCALE = 0.3
+const PREF_SMOOTH = 0.15
+
 // Recursively expand a partial ballot into templates, going as deep as the
 // polling data allows. Each call appends fully-resolved templates to `out`.
 function expand(
@@ -97,30 +112,53 @@ function expand(
     return
   }
 
-  const entries = available(nextMap, partial)
-  const total = entries.reduce((s, [, w]) => s + w, 0)
+  // Apply preference smoothing: blend raw cross-tab values toward a uniform
+  // distribution over ALL candidates.  Cross-tab sub-samples are small (30-50
+  // respondents per cell), so raw values carry substantial noise.  15% blend
+  // prevents any single candidate from dominating preference chains.
+  const nCands = polling.candidates.length
+  const uniformVal = 100 / nCands  // uniform share if spread evenly across candidates
+  const smoothedMap: Record<number, number> = {}
+  for (const c of polling.candidates) {
+    const raw = nextMap[c.candId] ?? 0
+    smoothedMap[c.candId] = (1 - PREF_SMOOTH) * raw + PREF_SMOOTH * uniformVal
+  }
 
-  if (total === 0) {
+  // fullTotal = sum of ALL smoothed values, including self-referential diagonals.
+  // Exhaust fraction = 1 − fullTotal/100, matching "undecided + don't rank" rows.
+  const fullTotal = sumObj(smoothedMap)
+
+  if (fullTotal === 0) {
     out.push({ prefs: [...partial], weight: weightSoFar, firstIdx })
     return
   }
 
-  // Fraction of voters who continue to a named candidate (vs. exhaust/undecided)
-  // "Undecided" and "Do Not Plan To Rank" rows are NOT in the entries because
-  // they are not candidate IDs — so total/100 is the continuing fraction.
-  const continueFrac = total / 100
+  const continueFrac = fullTotal / 100
 
-  // Exhausted at this depth
+  // Exhausted at this depth (genuine undecided/don't-rank voters)
   const exhaustWeight = weightSoFar * (1 - continueFrac)
   if (exhaustWeight > 1e-6) {
     out.push({ prefs: [...partial], weight: exhaustWeight, firstIdx })
   }
 
-  // Recurse for each named next choice
+  // Among continuing voters, distribute only to available (not already-ranked) candidates.
+  // Voters whose indicated next choice is already in their ballot (diagonal or repeat)
+  // are proportionally redistributed across the remaining available candidates.
+  const entries = available(smoothedMap, partial)
+  const availTotal = entries.reduce((s, [, w]) => s + w, 0)
+
+  if (availTotal === 0) {
+    // All continuing choices are blocked → treat as exhausted
+    if (continueFrac * weightSoFar > 1e-6) {
+      out.push({ prefs: [...partial], weight: continueFrac * weightSoFar, firstIdx })
+    }
+    return
+  }
+
   for (const [nextCand, nextWeight] of entries) {
     expand(
       [...partial, nextCand],
-      weightSoFar * (nextWeight / total) * continueFrac,
+      weightSoFar * continueFrac * (nextWeight / availTotal),
       firstIdx,
       polling,
       out
@@ -230,7 +268,7 @@ export function runForecast(
   const pollShares = pollCands.map(c =>
     decidedTotal > 0 ? c.firstChoicePct / decidedTotal : 1 / pollCands.length
   )
-  const nDecided = polling.sampleSize * (decidedPct / 100)
+  const nDecided = polling.sampleSize * (decidedPct / 100) * ALPHA_SCALE
   const alphas = pollShares.map(s => Math.max(s * nDecided, 0.5))
 
   // ── Live vote data ────────────────────────────────────────────────────────
