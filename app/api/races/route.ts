@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { getAllRaces, isConfigured } from '@/lib/ddhq'
 import { getRaces } from '@/lib/mock-data'
-import { getDistrictDescription, getDistrictTownCount } from '@/lib/district-descriptions'
+import { getDistrictDescription, getDistrictTownCount, getDistrictTowns } from '@/lib/district-descriptions'
 
 export const dynamic = 'force-dynamic'
 
@@ -55,6 +55,7 @@ export async function GET(req: Request) {
     precincts:   race.topline_results.precincts,
     description: getDistrictDescription(race.office, race.district ?? null),
     town_count:  getDistrictTownCount(race.office, race.district ?? null),
+    town_list:   getDistrictTowns(race.office, race.district ?? null),
   }))
 
   return NextResponse.json(results, {
