@@ -15,6 +15,7 @@
 
 import type { Race } from '@/lib/types'
 import type { RacePollingData } from '@/lib/polling-data'
+import { COUNTY_LEANS } from '@/lib/county-leans'
 
 // ── PRNG ──────────────────────────────────────────────────────────────────────
 
@@ -254,6 +255,52 @@ export interface RCVForecastResult {
 
 // ── Main entry point ──────────────────────────────────────────────────────────
 
+// Compute geographic-adjusted expected first-choice shares for remaining votes.
+// Uses county lean multipliers + DDHQ county reporting to identify which counties
+// haven't reported yet and what candidate distribution they're likely to show.
+function computeGeoShares(
+  race: Race,
+  candIds: number[],
+  pollShares: number[],
+  fallbackWeights: Record<string, number>,
+  leans: Record<string, Record<number, number>>
+): number[] | null {
+  const weighted = new Array(candIds.length).fill(0)
+  let totalWeight = 0
+
+  // Build list of county sources: prefer DDHQ data, fall back to 2018 proxy weights
+  const hasDDHQCounties = race.counties.length > 0
+  const sources: Array<{ name: string; remaining: number }> = []
+
+  if (hasDDHQCounties) {
+    for (const county of race.counties) {
+      const reported = Object.values(county.votes).reduce((s, v) => s + v, 0)
+      const estimated = county.estimated_votes?.turnout_mid ?? 0
+      const remaining = Math.max(0, estimated - reported)
+      if (remaining > 0) sources.push({ name: county.county, remaining })
+    }
+  } else {
+    // Pre-election: no county data yet — use all county weights as remaining
+    for (const [name, wt] of Object.entries(fallbackWeights)) {
+      sources.push({ name, remaining: wt })
+    }
+  }
+
+  for (const { name, remaining } of sources) {
+    const lean = leans[name]
+    const raw = candIds.map((id, i) => pollShares[i] * (lean?.[id] ?? 1.0))
+    const rawSum = raw.reduce((s, v) => s + v, 0)
+    if (rawSum <= 0) continue
+    for (let i = 0; i < candIds.length; i++) {
+      weighted[i] += remaining * (raw[i] / rawSum)
+    }
+    totalWeight += remaining
+  }
+
+  if (totalWeight <= 0) return null
+  return weighted.map(v => v / totalWeight)
+}
+
 export function runForecast(
   race: Race,
   polling: RacePollingData,
@@ -268,8 +315,6 @@ export function runForecast(
   const pollShares = pollCands.map(c =>
     decidedTotal > 0 ? c.firstChoicePct / decidedTotal : 1 / pollCands.length
   )
-  const nDecided = polling.sampleSize * (decidedPct / 100) * ALPHA_SCALE
-  const alphas = pollShares.map(s => Math.max(s * nDecided, 0.5))
 
   // ── Live vote data ────────────────────────────────────────────────────────
   const actualVotes: Record<number, number> = {}
@@ -285,6 +330,29 @@ export function runForecast(
   const pctRpt = totalEstimated > 0
     ? Math.min(100, Math.round((actualTotal / totalEstimated) * 100))
     : 0
+
+  // ── Geographic prior for remaining votes ──────────────────────────────────
+  // Use county lean multipliers to compute expected first-choice distribution
+  // for precincts that haven't reported yet.  As actual votes accumulate the
+  // geographic signal is reinforced and eventually dominated by real results.
+  const geoData = COUNTY_LEANS[race.slug]
+  const geoShares = geoData && Object.keys(geoData.leans).length > 0
+    ? computeGeoShares(race, candIds, pollShares, geoData.weights, geoData.leans)
+    : null
+
+  // Dirichlet prior for remaining votes blends poll + geographic expectations.
+  // Each alpha starts from the scaled poll prior; actual votes are added as
+  // Bayesian evidence (Dirichlet-Multinomial conjugate update); and the
+  // geographic prior adds soft evidence about which candidates the unreported
+  // precincts are likely to favor.
+  const nDecided = polling.sampleSize * (decidedPct / 100) * ALPHA_SCALE
+  const GEO_EVIDENCE = 150  // "equivalent votes" of geographic signal weight
+  const alphas = candIds.map((id, i) => {
+    const pollAlpha  = Math.max(pollShares[i] * nDecided, 0.5)
+    const actualBoost = actualVotes[id]
+    const geoBoost   = geoShares ? geoShares[i] * GEO_EVIDENCE : 0
+    return pollAlpha + actualBoost + geoBoost
+  })
 
   // ── Pre-build ballot templates (fixed across simulations) ─────────────────
   const templates = buildTemplates(pollCands, polling)
