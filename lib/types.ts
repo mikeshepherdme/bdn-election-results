@@ -136,8 +136,8 @@ export function partyColor(party: string): string {
 export function pctReporting(race: Race): number {
   if (race.reporting_type === 'estimated') {
     const est = race.topline_results.estimated_votes
-    if (!est || est.turnout_mid === 0) return 0
-    return Math.min(100, Math.round((est.estimated_votes_mid / est.turnout_mid) * 100))
+    if (!est || est.estimated_votes_mid === 0) return 0
+    return Math.min(100, Math.round((race.topline_results.total_votes / est.estimated_votes_mid) * 100))
   }
   const p = race.topline_results.precincts
   if (!p || p.total === 0) return 0
