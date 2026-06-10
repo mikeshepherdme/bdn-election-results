@@ -55,7 +55,14 @@ export async function GET(req: Request) {
     precincts:      race.topline_results.precincts,
     vcus_reporting: race.counties.reduce((sum, c) =>
       sum + c.vcus.filter(v => Object.values(v.votes as Record<string,number>).reduce((s,n)=>s+n,0) > 0).length, 0),
-    vcus_total: race.counties.reduce((sum, c) => sum + c.vcus.length, 0),
+    municipalities_total: (() => {
+      const vcuTotal  = race.counties.reduce((sum, c) => sum + c.vcus.length, 0)
+      const precTotal = race.topline_results.precincts?.total ?? 0
+      // DA races: bulk API only returns some counties, so precincts.total is the correct full count
+      // All other races: vcuTotal is more accurate (precincts.total inflates with sub-town precincts)
+      if (race.office === 'District Attorney') return precTotal
+      return vcuTotal > 0 ? vcuTotal : precTotal
+    })(),
     description: getDistrictDescription(race.office, race.district ?? null),
     town_count:  getDistrictTownCount(race.office, race.district ?? null),
     town_list:   getDistrictTowns(race.office, race.district ?? null),
