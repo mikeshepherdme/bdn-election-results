@@ -55,6 +55,7 @@ export async function GET(req: Request) {
     precincts:      race.topline_results.precincts,
     vcus_reporting: race.counties.reduce((sum, c) =>
       sum + c.vcus.filter(v => Object.values(v.votes as Record<string,number>).reduce((s,n)=>s+n,0) > 0).length, 0),
+    vcus_total: race.counties.reduce((sum, c) => sum + c.vcus.length, 0),
     description: getDistrictDescription(race.office, race.district ?? null),
     town_count:  getDistrictTownCount(race.office, race.district ?? null),
     town_list:   getDistrictTowns(race.office, race.district ?? null),
