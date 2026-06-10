@@ -28,13 +28,17 @@ const memStore: Record<string, RaceEvent[]> = {}
 const useKV = !!process.env.KV_REST_API_URL
 
 async function readSlug(slug: string): Promise<RaceEvent[]> {
-  if (useKV) return (await kv.get<RaceEvent[]>(`events:${slug}`)) ?? []
+  if (useKV) {
+    try { return (await kv.get<RaceEvent[]>(`events:${slug}`)) ?? [] } catch { /* fall through */ }
+  }
   return memStore[slug] ?? []
 }
 
 async function writeSlug(slug: string, events: RaceEvent[]): Promise<void> {
-  if (useKV) await kv.set(`events:${slug}`, events)
-  else memStore[slug] = events
+  if (useKV) {
+    try { await kv.set(`events:${slug}`, events); return } catch { /* fall through */ }
+  }
+  memStore[slug] = events
 }
 
 async function fetchStoryMeta(url: string): Promise<StoryMeta> {
