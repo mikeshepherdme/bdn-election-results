@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { kv } from '@vercel/kv'
 import { randomUUID } from 'crypto'
-import { getRace } from '@/lib/mock-data'
+import { getRaceBySlug as getRace } from '@/lib/ddhq'
 import { flatVcus, sortCandidates, pctReporting, candidatePct } from '@/lib/types'
 import { BELLWETHER_TOWNS } from '@/lib/bellwether-towns'
 import type { RaceEvent } from '../events/route'
