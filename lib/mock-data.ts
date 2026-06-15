@@ -1,5 +1,6 @@
 import type { Race, Candidate, County, Vcu } from '@/lib/types'
 import rawJson from '@/data/ddhq_races.json'
+import { applyOverrides } from '@/lib/race-overrides'
 
 function kebab(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
@@ -91,7 +92,7 @@ export function transform(r: any): Race {
 }
 
 function loadRaces(): Race[] {
-  return (rawJson as any[]).map(transform)
+  return (rawJson as any[]).map(r => applyOverrides(transform(r)))
 }
 
 export function getRaces(): Race[] {

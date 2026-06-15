@@ -1,5 +1,6 @@
 import type { Race, Vcu } from '@/lib/types'
 import { transform } from '@/lib/mock-data'
+import { applyOverrides } from '@/lib/race-overrides'
 
 const BASE         = process.env.DDHQ_API_BASE!
 const CLIENT_ID    = process.env.DDHQ_CLIENT_ID!
@@ -46,7 +47,7 @@ export async function getAllRaces(): Promise<Race[]> {
   // Fetch page 1 to learn total_pages
   const first = await fetchPage(baseUrl, 1, token)
   const totalPages: number = first.total_pages ?? 1
-  const races: Race[] = first.data.map(transform)
+  const races: Race[] = first.data.map(r => applyOverrides(transform(r)))
 
   // Fetch remaining pages in parallel
   if (totalPages > 1) {
@@ -54,7 +55,7 @@ export async function getAllRaces(): Promise<Race[]> {
       Array.from({ length: totalPages - 1 }, (_, i) => fetchPage(baseUrl, i + 2, token))
     )
     for (const page of rest) {
-      for (const raw of page.data) races.push(transform(raw))
+      for (const raw of page.data) races.push(applyOverrides(transform(raw)))
     }
   }
 
