@@ -43,6 +43,7 @@ export async function GET(req: Request) {
     election_type_id:  race.election_type_id,
     uncontested:       race.uncontested,
     called:            race.called,
+    rcv:               race.rcv,
     called_candidates: race.topline_results.called_candidates,
     candidates:        race.candidates.map(c => ({
       cand_id:    c.cand_id,

@@ -38,6 +38,7 @@ export function transform(r: any): Race {
     last_updated: r.last_updated ?? new Date().toISOString(),
     poll_close_time_utc: r.poll_close_time_utc ?? '2026-06-10T00:00:00Z',
     called: (topline.called_candidates?.length ?? 0) > 0,
+    rcv: false,
     candidates: (r.candidates ?? []).map((c: any): Candidate => ({
       cand_id: c.cand_id,
       first_name: c.first_name ?? '',

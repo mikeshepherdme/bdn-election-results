@@ -101,6 +101,7 @@ export interface Race {
   snapshots?: MarginSnapshot[]
   // convenience
   called: boolean
+  rcv: boolean
 }
 
 export interface TownContextRow {
